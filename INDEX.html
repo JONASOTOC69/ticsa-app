@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- CONFIGURACIÓN PWA PARA INSTALAR COMO APP NATIVA (MÓVIL / TABLETA) -->
+    <title>TICSA - Inspecciones 17 Puntos</title>
+    <meta name="theme-color" content="#0b1329">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TICSA App">
+
+    <!-- MANIFIESTO WEB DINÁMICO (WEB APP MANIFEST) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"TICSA Inspecciones","short_name":"TICSA App","start_url":".","display":"standalone","background_color":"#0b1329","theme_color":"#0b1329","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><rect width=\"512\" height=\"512\" fill=\"%230b1329\" rx=\"100\"/><rect x=\"60\" y=\"180\" width=\"392\" height=\"180\" fill=\"%23d97706\" rx=\"20\"/><text x=\"256\" y=\"310\" font-family=\"sans-serif\" font-weight=\"900\" font-size=\"110\" fill=\"%23ffffff\" text-anchor=\"middle\">TICSA</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDK v10 (CTPAT Project) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaMoxpbeGNLF3sKzDsSYSDNgo_cGofX64",
+            authDomain: "ctpat-cb043.firebaseapp.com",
+            projectId: "ctpat-cb043",
+            storageBucket: "ctpat-cb043.firebasestorage.app",
+            messagingSenderId: "147909305179",
+            appId: "1:147909305179:web:e362d1170e9bb2b1dbb07e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const inspectionsRef = collection(db, "inspecciones_ticsa");
+
+        window.db = db;
+        window.inspectionsRef = inspectionsRef;
+        window.addDoc = addDoc;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+
+        const q = query(inspectionsRef, orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const records = [];
+            snapshot.forEach((doc) => {
+                records.push({ id: doc.id, ...doc.data() });
+            });
+            window.globalRecords = records;
+            if (window.renderHistory) window.renderHistory();
+        }, (error) => {
+            console.warn("Modo respaldo local activo:", error);
+        });
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            @page { size: letter portrait; margin: 5mm; }
+        }
+        .print-only { display: none; }
+        .btn-status { transition: all 0.15s ease-in-out; }
+        .btn-status-ok.active { background-color: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
+        .btn-status-fail.active { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
+        .btn-status-na.active { background-color: #64748b !important; color: #ffffff !important; border-color: #475569 !important; }
+        #signature-pad { touch-action: none; background-color: #ffffff; }
+
+        .pdf-page { width: 100%; max-width: 800px; margin: 0 auto; background: #ffffff; color: #000000; padding: 10px; font-size: 10px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+        .pdf-table-border { width: 100%; border-collapse: collapse; }
+        .pdf-table-border th, .pdf-table-border td { border: 1px solid #000000; padding: 3px 5px; font-size: 9px; }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- CABECERA -->
+    <header class="no-print bg-[#0b1329] border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div id="company-logo-container" class="flex items-center">
+                    <div id="default-logo-badge" class="bg-amber-500 text-slate-950 font-black px-3 py-1 rounded text-xl tracking-wider">
+                        TICSA
+                    </div>
+                    <img id="custom-logo-img" src="" class="hidden h-10 max-w-[140px] object-contain rounded bg-white p-1">
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold text-white leading-tight">Sistema de Inspecciones Cloud</h1>
+                    <p class="text-xs text-slate-400">Sincronizado Celular / PC (SGS-PTICSA-050-F01)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition">
+                    <i data-lucide="upload" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span class="hidden sm:inline">Subir Logo</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="uploadCustomLogo(event)">
+                </label>
+                <button onclick="switchTab('form')" id="tab-form-btn" class="flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Nueva Inspección</span>
+                </button>
+                <button onclick="switchTab('history')" id="tab-history-btn" class="flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition">
+                    <i data-lucide="folder" class="w-4 h-4"></i>
+                    <span>Historial Cloud</span>
+                    <span id="history-counter-badge" class="bg-amber-500 text-slate-950 px-1.5 py-0.2 text-xs rounded-full font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+        <!-- FORMULARIO -->
+        <div id="view-form" class="no-print space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div>
+                    <span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20 mb-1">APP MÓVIL SINCRONIZADA</span>
+                    <h2 class="text-lg font-bold text-slate-900">Inspección de 17 Puntos, Sello y Seguridad Agrícola</h2>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="resetForm()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-300 transition">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Limpiar
+                    </button>
+                    <button type="button" onclick="saveInspection(false)" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition shadow">
+                        <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> Guardar en Nube
+                    </button>
+                    <button type="button" onclick="saveAndPrint()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-lg transition shadow">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Guardar e Imprimir PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- DATOS GENERALES -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-100 pb-2">
+                    <i data-lucide="truck" class="w-5 h-5 text-amber-500"></i>
+                    <h3>Datos Generales de la Unidad</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NO. TRACTO *</label>
+                        <input type="text" id="no_tracto" placeholder="Ej. 11" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">PLACAS TRACTO *</label>
+                        <input type="text" id="placas_tracto" placeholder="Ej. 38452" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 uppercase focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">NO. CAJA</label>
+                        <input type="text" id="no_caja" placeholder="Ej. 000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">PLACAS CAJA</label>
+                        <input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 uppercase focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">OPERADOR *</label>
+                        <input type="text" id="operador" placeholder="Ej. MARCOS" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">FECHA *</label>
+                        <input type="date" id="fecha" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">HORA *</label>
+                        <input type="time" id="hora" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">SELLO NÚMERO</label>
+                        <input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label>
+                        <input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- EVIDENCIA FOTOGRÁFICA -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <div class="flex items-center gap-2 text-slate-900 font-bold">
+                        <i data-lucide="camera" class="w-5 h-5 text-amber-500"></i>
+                        <h3>Evidencia Fotográfica de las Unidades</h3>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <label class="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2.5 rounded-lg cursor-pointer transition text-sm">
+                        <i data-lucide="image-plus" class="w-4 h-4"></i>
+                        <span>Tomar Foto / Adjuntar Imágenes</span>
+                        <input type="file" id="photo-input" accept="image/*" multiple capture="environment" class="hidden" onchange="handlePhotoUpload(event)">
+                    </label>
+                </div>
+
+                <div id="photo-preview-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- 17 PUNTOS -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
+                    <div class="flex items-center gap-2 text-slate-900 font-bold">
+                        <i data-lucide="list-checks" class="w-5 h-5 text-amber-500"></i>
+                        <h3>Tabla de 17 Puntos de Inspección</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="markAll17('ok')" class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded hover:bg-emerald-100 transition">
+                            Marcar Todo ✓
+                        </button>
+                        <button type="button" onclick="markBoxNA()" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 rounded hover:bg-slate-200 transition">
+                            Caja a N/A (11 a 16)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5" id="inspection-points-container">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+
+            <!-- SEGURIDAD AGRÍCOLA -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
+                    <div class="flex items-center gap-2 text-slate-900 font-bold">
+                        <i data-lucide="sprout" class="w-5 h-5 text-amber-500"></i>
+                        <h3>Inspección de Seguridad Agrícola</h3>
+                    </div>
+                    <button type="button" onclick="markAllAgri('clean')" class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded hover:bg-emerald-100 transition">
+                        Marcar Todo Limpio ✓
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="agri-points-container">
+                    <!-- Dinámico -->
+                </div>
+
+                <div class="pt-2">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">BASURA EN CABINA GENERADA POR EL OPERADOR (ESPECIFIQUE):</label>
+                    <input type="text" id="agri_basura" placeholder="Ej. Sin novedad" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <!-- OBSERVACIONES Y FIRMA -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">OBSERVACIONES ADICIONALES</label>
+                        <textarea id="observaciones" rows="5" placeholder="Escriba observaciones adicionales..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-amber-500"></textarea>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-bold text-slate-700">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
+                            <button type="button" onclick="clearSignature()" class="text-xs text-slate-500 hover:text-rose-600 transition flex items-center gap-1">
+                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i> Limpiar Firma
+                            </button>
+                        </div>
+                        <div class="border-2 border-dashed border-slate-300 rounded-lg p-1 bg-white">
+                            <canvas id="signature-pad" class="w-full h-32 rounded cursor-crosshair"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTONERA -->
+            <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+                <button type="button" onclick="resetForm()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-sm transition">
+                    Reiniciar Formulario
+                </button>
+                <button type="button" onclick="saveInspection(false)" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm transition shadow flex items-center justify-center gap-1.5">
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i> Guardar en Nube
+                </button>
+                <button type="button" onclick="saveAndPrint()" class="w-full sm:w-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-sm transition shadow flex items-center justify-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Guardar e Imprimir PDF
+                </button>
+            </div>
+
+        </div>
+
+        <!-- VISTA DE HISTORIAL -->
+        <div id="view-history" class="no-print hidden space-y-6">
+            <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Historial Sincronizado (Celular / PC)</h2>
+                    <p class="text-xs text-slate-500">Proyectado en vivo desde Firebase Firestore.</p>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
+                    <input type="text" id="search-history" onkeyup="renderHistory()" placeholder="Buscar por Tracto, Operador..." class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-[#0b1329] text-white uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">FECHA / HORA</th>
+                            <th class="p-3">TRACTO / CAJA</th>
+                            <th class="p-3">OPERADOR</th>
+                            <th class="p-3">FOTOS</th>
+                            <th class="p-3">17 PUNTOS</th>
+                            <th class="p-3">SEG. AGRÍCOLA</th>
+                            <th class="p-3 text-right">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-slate-200">
+                        <!-- Dinámico -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FORMATO DE IMPRESIÓN OFICIAL (PRINT-ONLY) -->
+    <div class="print-only">
+        <div id="pdf-printable-area" class="pdf-page">
+            
+            <table class="pdf-table-border" style="margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 28%; text-align: center; vertical-align: middle;">
+                        <div id="print-logo-box">
+                            <div id="print-default-badge" style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">TICSA</div>
+                            <img id="print-custom-logo" src="" style="display: none; max-height: 40px; margin: 0 auto;">
+                        </div>
+                    </td>
+                    <td style="width: 47%; text-align: center; vertical-align: middle;">
+                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">INSPECCIÓN 17 PUNTOS, SELLO Y SEGURIDAD AGRÍCOLA</div>
+                        <div style="font-size: 8px; font-style: italic; color: #444; margin-top: 2px;">
+                            La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
+                        </div>
+                    </td>
+                    <td style="width: 25%; font-size: 8px; vertical-align: middle; padding-left: 5px;">
+                        <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
+                        <div><strong>Rev.:</strong> 01</div>
+                        <div><strong>Folio:</strong> <span id="print-folio">1790619959095</span></div>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="pdf-table-border" style="margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 35%;"><strong>No. Tracto:</strong> <span id="print-no-tracto">11</span></td>
+                    <td style="width: 35%;"><strong>No. Caja:</strong> <span id="print-no-caja">00</span></td>
+                    <td style="width: 30%;"><strong>Hora:</strong> <span id="print-hora">12:16</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Placas Tracto:</strong> <span id="print-placas-tracto">65694</span></td>
+                    <td><strong>Placas Caja:</strong> <span id="print-placas-caja">00</span></td>
+                    <td><strong>Fecha:</strong> <span id="print-fecha">2026-09-28</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>Operador:</strong> <span id="print-operador">marco</span></td>
+                    <td><strong>Sello número:</strong> <span id="print-sello">0000</span></td>
+                </tr>
+            </table>
+
+            <table class="pdf-table-border" style="margin-bottom: 5px;">
+                <tr>
+                    <td style="width: 46%; vertical-align: top; text-align: center; padding: 4px;">
+                        <div style="font-size: 7.5px; font-weight: normal; margin-bottom: 4px; text-align: center;">
+                            La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
+                        </div>
+                        
+                        <div style="border: 1px solid #94a3b8; padding: 6px; background: #ffffff; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border-radius: 2px;">
+                            <svg viewBox="0 0 520 180" style="width: 100%; height: auto; display: block;">
+                                <defs>
+                                    <marker id="red-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626" />
+                                    </marker>
+                                </defs>
+                                <path d="M 50 105 C 50 105 80 100 90 90 C 100 70 105 50 125 50 L 150 50 L 155 130 L 50 130 Z" fill="#f1f5f9" stroke="#334155" stroke-width="2" />
+                                <rect x="80" y="60" width="30" height="25" fill="#cbd5e1" rx="2" />
+                                <rect x="155" y="45" width="275" height="85" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+                                <rect x="430" y="45" width="25" height="85" fill="#e2e8f0" stroke="#334155" stroke-width="1.5" />
+
+                                <circle cx="75" cy="130" r="13" fill="#1e293b" /><circle cx="75" cy="130" r="5" fill="#94a3b8" />
+                                <circle cx="170" cy="130" r="13" fill="#1e293b" /><circle cx="170" cy="130" r="5" fill="#94a3b8" />
+                                <circle cx="198" cy="130" r="13" fill="#1e293b" /><circle cx="198" cy="130" r="5" fill="#94a3b8" />
+                                <circle cx="325" cy="130" r="13" fill="#1e293b" /><circle cx="325" cy="130" r="5" fill="#94a3b8" />
+                                <circle cx="353" cy="130" r="13" fill="#1e293b" /><circle cx="353" cy="130" r="5" fill="#94a3b8" />
+                                <circle cx="381" cy="130" r="13" fill="#1e293b" /><circle cx="381" cy="130" r="5" fill="#94a3b8" />
+
+                                <line x1="45" y1="148" x2="45" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="45" cy="148" r="8" fill="#dc2626" /><text x="45" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+
+                                <line x1="60" y1="32" x2="70" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="60" cy="32" r="8" fill="#dc2626" /><text x="60" y="35" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">2</text>
+
+                                <line x1="75" y1="160" x2="75" y2="143" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="75" cy="160" r="8" fill="#dc2626" /><text x="75" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">3</text>
+
+                                <line x1="105" y1="148" x2="105" y2="110" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="105" cy="148" r="8" fill="#dc2626" /><text x="105" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
+
+                                <line x1="125" y1="160" x2="125" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="125" cy="160" r="8" fill="#dc2626" /><text x="125" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">5</text>
+
+                                <line x1="135" y1="135" x2="135" y2="95" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="135" cy="135" r="8" fill="#dc2626" /><text x="135" y="138" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
+
+                                <line x1="150" y1="160" x2="150" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="150" cy="160" r="8" fill="#dc2626" /><text x="150" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
+
+                                <line x1="170" y1="160" x2="170" y2="143" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="170" cy="160" r="8" fill="#dc2626" /><text x="170" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
+
+                                <line x1="225" y1="148" x2="225" y2="125" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="225" cy="148" r="8" fill="#dc2626" /><text x="225" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">9</text>
+
+                                <line x1="285" y1="155" x2="285" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="285" cy="155" r="8" fill="#dc2626" /><text x="285" y="158" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">10</text>
+
+                                <line x1="435" y1="22" x2="435" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="435" cy="22" r="8" fill="#dc2626" /><text x="435" y="25" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">11</text>
+
+                                <line x1="415" y1="155" x2="415" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="415" cy="155" r="8" fill="#dc2626" /><text x="415" y="158" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">12</text>
+
+                                <line x1="315" y1="22" x2="315" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="315" cy="22" r="8" fill="#dc2626" /><text x="315" y="25" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">13</text>
+
+                                <line x1="160" y1="18" x2="160" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="160" cy="18" r="8" fill="#dc2626" /><text x="160" y="21" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">14</text>
+
+                                <line x1="220" y1="18" x2="220" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="220" cy="18" r="8" fill="#dc2626" /><text x="220" y="21" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">15</text>
+
+                                <line x1="145" y1="42" x2="145" y2="58" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="145" cy="42" r="8" fill="#dc2626" /><text x="145" y="45" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">16</text>
+
+                                <line x1="110" y1="32" x2="115" y2="50" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
+                                <circle cx="110" cy="32" r="8" fill="#dc2626" /><text x="110" y="35" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">17</text>
+                            </svg>
+
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; text-align: left; font-size: 6.5px; font-weight: bold; color: #dc2626; margin-top: 6px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
+                                <div>
+                                    <div>1.- Defensa</div>
+                                    <div>2.- Motor</div>
+                                    <div>3.- Llantas</div>
+                                    <div>4.- Piso (del camión)</div>
+                                    <div>5.- Tanque de combustible</div>
+                                </div>
+                                <div>
+                                    <div>6.- Cabina</div>
+                                    <div>7.- Tanque de aire</div>
+                                    <div>8.- Ejes de acción</div>
+                                    <div>9.- Llanta de repuesto</div>
+                                </div>
+                                <div>
+                                    <div>10.- Exteriores/ tren de rodaje</div>
+                                    <div>11.- Puertas por dentro/fuera</div>
+                                    <div>12.- Piso (de la caja)</div>
+                                    <div>13.- Paredes laterales</div>
+                                </div>
+                                <div>
+                                    <div>14.- Pared frontal</div>
+                                    <div>15.- Techo</div>
+                                    <div>16.- Unidad de refrigeración</div>
+                                    <div>17.- Escape</div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td style="width: 54%; padding: 0; vertical-align: top;">
+                        <table class="pdf-table-border" style="border: none;">
+                            <thead>
+                                <tr style="background: #f1f5f9;">
+                                    <th style="width: 15px; border-top: none; border-left: none;">#</th>
+                                    <th style="text-align: left; border-top: none;">Punto de Inspección</th>
+                                    <th style="width: 20px; border-top: none;">St.</th>
+                                    <th style="text-align: left; border-top: none; border-right: none;">Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="print-17-table-body">
+                                <!-- Dinámico -->
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="pdf-table-border" style="margin-bottom: 5px;">
+                <thead>
+                    <tr style="background: #f1f5f9;">
+                        <th colspan="4" style="text-align: center; font-size: 9px; text-transform: uppercase;">SEGURIDAD AGRÍCOLA</th>
+                    </tr>
+                </thead>
+                <tbody id="print-agri-grid-body">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+
+            <table class="pdf-table-border" style="margin-bottom: 20px;">
+                <tr>
+                    <td><strong>Basura en cabina generada por el operador:</strong> <span id="print-basura">Sin novedad</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Observaciones adicionales:</strong> <span id="print-observaciones">Sin observaciones adicionales</span></td>
+                </tr>
+            </table>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; padding: 0 10px;">
+                <div>
+                    <div style="font-size: 9px;"><strong>Nombre Inspector:</strong> <span id="print-inspector-nombre">pedro</span></div>
+                    <div style="font-size: 7px; color: #666; margin-top: 2px;">Formato Oficial - Sistema de Gestión TICSA</div>
+                </div>
+
+                <div style="text-align: center; width: 220px;">
+                    <div style="height: 35px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+                        <img id="print-signature-img" src="" style="max-height: 35px; max-width: 100%; display: none;">
+                    </div>
+                    <div style="border-top: 1px solid #000; font-size: 8px; font-weight: bold; pt: 2px;">
+                        FIRMA DEL OFICIAL DE SEGURIDAD
+                    </div>
+                </div>
+            </div>
+
+            <div id="print-photos-container" style="page-break-before: always; margin-top: 15px; display: none;">
+                <div style="font-weight: bold; font-size: 10px; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px;">
+                    EVIDENCIA FOTOGRÁFICA ADJUNTA AL FOLIO
+                </div>
+                <div id="print-photos-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <!-- Imágenes -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LOGICA JS -->
+    <script>
+        const POINTS_17 = [
+            "Defensa", "Motor", "Llantas", "Piso (del camión)", "Tanque de combustible",
+            "Cabina", "Tanque de aire", "Ejes de acción", "Llanta de repuesto",
+            "Exteriores/ tren de rodaje", "Puertas por dentro/fuera", "Piso (de la caja)",
+            "Paredes laterales", "Pared frontal", "Techo", "Unidad de refrigeración", "Escape"
+        ];
+
+        const AGRI_POINTS = [
+            "Insectos vivos o muertos", "Moho", "Hojas, ramitas, corteza", "Huevecillos",
+            "Carne", "Sangre", "Huesos", "Pelo", "Secreciones", "Excreciones",
+            "Frutas", "Semillas", "Hongos", "Lodo", "Animal vivo o muerto: liebre, serpiente"
+        ];
+
+        let currentPhotos = [];
+        let pointsState = {};
+        let agriState = {};
+        let signaturePadCanvas, signatureCtx;
+        let isSigning = false;
+        window.globalRecords = window.globalRecords || [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initDateAndHours();
+            initPointsTables();
+            initSignaturePad();
+            loadSavedLogo();
+            loadRecords();
+        });
+
+        function uploadCustomLogo(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const src = evt.target.result;
+                    try { localStorage.setItem('ticsa_custom_logo', src); } catch(err){}
+                    applyLogo(src);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function loadSavedLogo() {
+            try {
+                const savedLogo = localStorage.getItem('ticsa_custom_logo');
+                if (savedLogo) applyLogo(savedLogo);
+            } catch(e){}
+        }
+
+        function applyLogo(src) {
+            document.getElementById('default-logo-badge').classList.add('hidden');
+            const customImg = document.getElementById('custom-logo-img');
+            customImg.src = src;
+            customImg.classList.remove('hidden');
+
+            document.getElementById('print-default-badge').style.display = 'none';
+            const printImg = document.getElementById('print-custom-logo');
+            printImg.src = src;
+            printImg.style.display = 'block';
+        }
+
+        function initDateAndHours() {
+            const now = new Date();
+            document.getElementById('fecha').value = now.toISOString().split('T')[0];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('hora').value = `${hours}:${minutes}`;
+        }
+
+        function initPointsTables() {
+            const container17 = document.getElementById('inspection-points-container');
+            container17.innerHTML = '';
+            POINTS_17.forEach((point, idx) => {
+                const pointNum = idx + 1;
+                pointsState[pointNum] = { status: 'ok', detail: '' };
+
+                const row = document.createElement('div');
+                row.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 gap-2";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-[180px]">
+                        <span class="w-5 h-5 rounded-full bg-slate-800 text-amber-400 font-bold flex items-center justify-center text-[11px]">${pointNum}</span>
+                        <span class="text-xs font-semibold text-slate-800">${point}</span>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <div class="inline-flex rounded border border-slate-300 bg-white p-0.5 shadow-sm">
+                            <button type="button" onclick="setPointStatus(${pointNum}, 'ok')" id="btn-17-${pointNum}-ok" class="btn-status btn-status-ok active px-2 py-0.5 text-xs font-bold rounded">✓</button>
+                            <button type="button" onclick="setPointStatus(${pointNum}, 'fail')" id="btn-17-${pointNum}-fail" class="btn-status btn-status-fail px-2 py-0.5 text-xs font-bold rounded text-slate-400">X</button>
+                            <button type="button" onclick="setPointStatus(${pointNum}, 'na')" id="btn-17-${pointNum}-na" class="btn-status btn-status-na px-2 py-0.5 text-xs font-bold rounded text-slate-400">N/A</button>
+                        </div>
+                        <input type="text" id="detail-17-${pointNum}" onchange="setPointDetail(${pointNum}, this.value)" placeholder="Detalle si aplica..." class="flex-1 sm:w-48 bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500">
+                    </div>
+                `;
+                container17.appendChild(row);
+            });
+
+            const containerAgri = document.getElementById('agri-points-container');
+            containerAgri.innerHTML = '';
+            AGRI_POINTS.forEach((item, idx) => {
+                agriState[idx] = 'clean';
+
+                const card = document.createElement('div');
+                card.className = "flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200";
+                card.innerHTML = `
+                    <span class="text-xs text-slate-700 font-medium pr-2">${item}</span>
+                    <div class="inline-flex rounded border border-slate-300 bg-white p-0.5 shadow-sm">
+                        <button type="button" onclick="setAgriStatus(${idx}, 'clean')" id="btn-agri-${idx}-clean" class="btn-status btn-status-ok active px-2 py-0.5 text-xs font-bold rounded">✓</button>
+                        <button type="button" onclick="setAgriStatus(${idx}, 'detected')" id="btn-agri-${idx}-detected" class="btn-status btn-status-fail px-2 py-0.5 text-xs font-bold rounded text-slate-400">X</button>
+                    </div>
+                `;
+                containerAgri.appendChild(card);
+            });
+        }
+
+        function setPointStatus(num, status) {
+            pointsState[num].status = status;
+            ['ok', 'fail', 'na'].forEach(s => {
+                const btn = document.getElementById(`btn-17-${num}-${s}`);
+                if (s === status) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function setPointDetail(num, text) {
+            pointsState[num].detail = text;
+        }
+
+        function setAgriStatus(idx, status) {
+            agriState[idx] = status;
+            ['clean', 'detected'].forEach(s => {
+                const btn = document.getElementById(`btn-agri-${idx}-${s}`);
+                if (s === status) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function markAll17(status) {
+            for (let i = 1; i <= 17; i++) setPointStatus(i, status);
+        }
+
+        function markBoxNA() {
+            for (let i = 11; i <= 16; i++) setPointStatus(i, 'na');
+        }
+
+        function markAllAgri(status) {
+            AGRI_POINTS.forEach((_, idx) => setAgriStatus(idx, status));
+        }
+
+        function initSignaturePad() {
+            signaturePadCanvas = document.getElementById('signature-pad');
+            signatureCtx = signaturePadCanvas.getContext('2d');
+            signaturePadCanvas.width = signaturePadCanvas.offsetWidth;
+            signaturePadCanvas.height = signaturePadCanvas.offsetHeight;
+
+            signatureCtx.strokeStyle = "#000000";
+            signatureCtx.lineWidth = 2;
+            signatureCtx.lineCap = "round";
+
+            function getPos(e) {
+                const rect = signaturePadCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function startDraw(e) {
+                isSigning = true;
+                const pos = getPos(e);
+                signatureCtx.beginPath();
+                signatureCtx.moveTo(pos.x, pos.y);
+            }
+
+            function draw(e) {
+                if (!isSigning) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                signatureCtx.lineTo(pos.x, pos.y);
+                signatureCtx.stroke();
+            }
+
+            function stopDraw() { isSigning = false; }
+
+            signaturePadCanvas.addEventListener('mousedown', startDraw);
+            signaturePadCanvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDraw);
+
+            signaturePadCanvas.addEventListener('touchstart', startDraw, { passive: false });
+            signaturePadCanvas.addEventListener('touchmove', draw, { passive: false });
+            window.addEventListener('touchend', stopDraw);
+        }
+
+        function clearSignature() {
+            if (signatureCtx) signatureCtx.clearRect(0, 0, signaturePadCanvas.width, signaturePadCanvas.height);
+        }
+
+        function handlePhotoUpload(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhotos.push(e.target.result);
+                    renderPhotoPreviews();
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function removePhoto(index) {
+            currentPhotos.splice(index, 1);
+            renderPhotoPreviews();
+        }
+
+        function renderPhotoPreviews() {
+            const grid = document.getElementById('photo-preview-grid');
+            grid.innerHTML = '';
+            currentPhotos.forEach((src, idx) => {
+                const div = document.createElement('div');
+                div.className = "relative group rounded-lg overflow-hidden border border-slate-300 bg-slate-100 aspect-video";
+                div.innerHTML = `
+                    <img src="${src}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removePhoto(${idx})" class="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded-full shadow hover:bg-rose-500 transition">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                `;
+                grid.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function loadRecords() {
+            try {
+                const data = localStorage.getItem('ticsa_inspections');
+                if (data && (!window.globalRecords || window.globalRecords.length === 0)) {
+                    window.globalRecords = JSON.parse(data);
+                }
+            } catch (e) {}
+            renderHistory();
+        }
+
+        async function saveInspection(silent = false) {
+            const noTracto = document.getElementById('no_tracto').value.trim();
+            const placasTracto = document.getElementById('placas_tracto').value.trim();
+            const operador = document.getElementById('operador').value.trim();
+            const oficial = document.getElementById('oficial_nombre').value.trim();
+
+            if (!noTracto || !placasTracto || !operador || !oficial) {
+                alert('Por favor complete todos los campos obligatorios (*)');
+                return null;
+            }
+
+            const record = {
+                timestamp: Date.now(),
+                folio: Date.now().toString(),
+                no_tracto: noTracto,
+                placas_tracto: placasTracto,
+                no_caja: document.getElementById('no_caja').value.trim() || '00',
+                placas_caja: document.getElementById('placas_caja').value.trim() || '00',
+                operador: operador,
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value,
+                sello_numero: document.getElementById('sello_numero').value.trim() || '0000',
+                oficial_nombre: oficial,
+                basura_cabina: document.getElementById('agri_basura').value.trim() || 'Sin novedad',
+                observaciones: document.getElementById('observaciones').value.trim() || 'Sin observaciones adicionales',
+                pointsState: JSON.parse(JSON.stringify(pointsState)),
+                agriState: JSON.parse(JSON.stringify(agriState)),
+                photos: [...currentPhotos],
+                signature: signaturePadCanvas.toDataURL()
+            };
+
+            if (window.inspectionsRef) {
+                try {
+                    await window.addDoc(window.inspectionsRef, record);
+                } catch(e) { console.warn("Guardando solo localmente:", e); }
+            }
+
+            window.globalRecords.unshift(record);
+            try { localStorage.setItem('ticsa_inspections', JSON.stringify(window.globalRecords)); } catch(e){}
+
+            if (!silent) {
+                alert('¡Inspección guardada y sincronizada!');
+            }
+
+            renderHistory();
+            return record;
+        }
+
+        function saveAndPrint() {
+            saveInspection(true).then(record => {
+                if (record) {
+                    populatePrintLayout(record);
+                    setTimeout(() => window.print(), 200);
+                }
+            });
+        }
+
+        function printRecord(id) {
+            const record = window.globalRecords.find(item => item.id === id || item.timestamp === id);
+            if (record) {
+                populatePrintLayout(record);
+                setTimeout(() => window.print(), 200);
+            }
+        }
+
+        function populatePrintLayout(data) {
+            document.getElementById('print-folio').innerText = data.folio || data.timestamp || data.id;
+            document.getElementById('print-no-tracto').innerText = data.no_tracto;
+            document.getElementById('print-placas-tracto').innerText = data.placas_tracto;
+            document.getElementById('print-no-caja').innerText = data.no_caja;
+            document.getElementById('print-placas-caja').innerText = data.placas_caja;
+            document.getElementById('print-fecha').innerText = data.fecha;
+            document.getElementById('print-hora').innerText = data.hora;
+            document.getElementById('print-operador').innerText = data.operador;
+            document.getElementById('print-sello').innerText = data.sello_numero;
+            document.getElementById('print-basura').innerText = data.basura_cabina;
+            document.getElementById('print-observaciones').innerText = data.observaciones;
+            document.getElementById('print-inspector-nombre').innerText = data.oficial_nombre;
+
+            const sigImg = document.getElementById('print-signature-img');
+            if (data.signature) {
+                sigImg.src = data.signature;
+                sigImg.style.display = 'block';
+            } else {
+                sigImg.style.display = 'none';
+            }
+
+            const table17 = document.getElementById('print-17-table-body');
+            table17.innerHTML = '';
+            POINTS_17.forEach((point, idx) => {
+                const num = idx + 1;
+                const state = data.pointsState[num] || { status: 'ok', detail: '' };
+                let symbol = '✓';
+                if (state.status === 'fail') symbol = 'X';
+                if (state.status === 'na') symbol = 'N/A';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; font-weight: bold;">${num}</td>
+                    <td>${point}</td>
+                    <td style="text-align: center; font-weight: bold;">${symbol}</td>
+                    <td>${state.detail || ''}</td>
+                `;
+                table17.appendChild(tr);
+            });
+
+            const agriBody = document.getElementById('print-agri-grid-body');
+            agriBody.innerHTML = '';
+            const half = Math.ceil(AGRI_POINTS.length / 2);
+            for (let i = 0; i < half; i++) {
+                const item1 = AGRI_POINTS[i];
+                const state1 = (data.agriState[i] === 'detected') ? 'X' : '✓';
+
+                const j = i + half;
+                const item2 = AGRI_POINTS[j] || '';
+                const state2 = item2 ? ((data.agriState[j] === 'detected') ? 'X' : '✓') : '';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item1}</td>
+                    <td style="text-align: center; font-weight: bold; width: 25px;">${state1}</td>
+                    <td>${item2}</td>
+                    <td style="text-align: center; font-weight: bold; width: 25px;">${state2}</td>
+                `;
+                agriBody.appendChild(tr);
+            }
+
+            const photoGrid = document.getElementById('print-photos-grid');
+            photoGrid.innerHTML = '';
+            if (data.photos && data.photos.length > 0) {
+                document.getElementById('print-photos-container').style.display = 'block';
+                data.photos.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.style.width = '100%';
+                    img.style.height = '140px';
+                    img.style.objectFit = 'cover';
+                    img.style.border = '1px solid #000';
+                    photoGrid.appendChild(img);
+                });
+            } else {
+                document.getElementById('print-photos-container').style.display = 'none';
+            }
+        }
+
+        function switchTab(tab) {
+            const formView = document.getElementById('view-form');
+            const historyView = document.getElementById('view-history');
+            const formBtn = document.getElementById('tab-form-btn');
+            const historyBtn = document.getElementById('tab-history-btn');
+
+            if (tab === 'form') {
+                formView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+                formBtn.className = "flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition";
+                historyBtn.className = "flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition";
+            } else {
+                formView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                historyBtn.className = "flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition";
+                formBtn.className = "flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition";
+                renderHistory();
+            }
+        }
+
+        window.renderHistory = function() {
+            const tbody = document.getElementById('history-table-body');
+            const badge = document.getElementById('history-counter-badge');
+
+            if (badge) badge.innerText = window.globalRecords.length;
+
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (window.globalRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500 font-medium">No hay inspecciones guardadas.</td></tr>`;
+                return;
+            }
+
+            window.globalRecords.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-bold text-slate-900">${item.fecha}</div>
+                        <div class="text-[10px] text-slate-500">${item.hora}</div>
+                    </td>
+                    <td class="p-3 font-bold text-slate-900">
+                        ${item.no_tracto} / ${item.no_caja}
+                    </td>
+                    <td class="p-3 font-medium text-slate-700">${item.operador}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-[10px] font-bold"><i data-lucide="image" class="w-3 h-3 inline"></i> ${item.photos ? item.photos.length : 0}</span></td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">OK</span></td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Limpio</span></td>
+                    <td class="p-3 text-right">
+                        <button onclick="printRecord('${item.id || item.timestamp}')" class="p-1.5 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/20 rounded transition" title="Imprimir PDF">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteRecord('${item.id || item.timestamp}')" class="p-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border border-rose-500/20 rounded transition ml-1" title="Eliminar">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        async function deleteRecord(id) {
+            if (confirm('¿Desea eliminar este registro?')) {
+                if (window.db && window.doc) {
+                    try {
+                        await window.deleteDoc(window.doc(window.db, "inspecciones_ticsa", id));
+                    } catch(e){}
+                }
+                window.globalRecords = window.globalRecords.filter(item => item.id !== id && item.timestamp !== id);
+                try { localStorage.setItem('ticsa_inspections', JSON.stringify(window.globalRecords)); } catch(e){}
+                renderHistory();
+            }
+        }
+
+        function resetForm() {
+            if (confirm('¿Desea reiniciar todo el formulario?')) {
+                document.getElementById('no_tracto').value = '';
+                document.getElementById('placas_tracto').value = '';
+                document.getElementById('no_caja').value = '';
+                document.getElementById('placas_caja').value = '';
+                document.getElementById('operador').value = '';
+                document.getElementById('sello_numero').value = '';
+                document.getElementById('oficial_nombre').value = '';
+                document.getElementById('agri_basura').value = '';
+                document.getElementById('observaciones').value = '';
+                currentPhotos = [];
+                renderPhotoPreviews();
+                clearSignature();
+                initDateAndHours();
+                markAll17('ok');
+                markAllAgri('clean');
+            }
+        }
+    </script>
+</body>
+</html>
