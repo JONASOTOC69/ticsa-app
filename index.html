@@ -18,11 +18,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
-    /* REGLAS EXCLUSIVAS DE IMPRESIÓN OFICIAL TICSA */
     @media print {
       @page {
         size: letter portrait;
-        margin: 8mm;
+        margin: 6mm;
       }
       body > *:not(#formatoImpresionOficial) { display: none !important; }
       #formatoImpresionOficial { 
@@ -37,23 +36,36 @@
       .tbl-print-border {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
       }
       .tbl-print-border td, .tbl-print-border th {
         border: 1px solid #000;
         padding: 2px 4px;
-        font-size: 9px;
+        font-size: 8.5px;
       }
 
-      .text-center-imp { text-align: center; }
-      .text-bold-imp { font-weight: bold; }
+      .trailer-box {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        padding: 2px;
+        text-align: center;
+        margin-bottom: 4px;
+      }
+      
+      .trailer-img-oficial {
+        max-width: 100%;
+        max-height: 180px;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+      }
     }
     #formatoImpresionOficial { display: none; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <!-- BARRA SUPERIOR DE LA APP -->
+  <!-- BARRA SUPERIOR CON NAVEGACIÓN -->
   <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center gap-3">
@@ -97,7 +109,7 @@
           <div><label class="block text-xs font-bold text-slate-500 mb-1">HORA *</label><input type="time" id="hora" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
         </div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. ALONDRA" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
       </section>
 
       <!-- 17 PUNTOS -->
@@ -193,10 +205,10 @@
     <!-- Encabezado Oficial -->
     <table class="tbl-print-border" style="margin-bottom: 2px;">
       <tr>
-        <td style="width: 28%; text-align: center; vertical-align: middle;">
+        <td style="width: 25%; text-align: center; vertical-align: middle;">
           <div style="font-weight: 900; font-size: 22px; letter-spacing: 1px;">TICSA</div>
         </td>
-        <td style="width: 47%; text-align: center; vertical-align: middle;">
+        <td style="width: 50%; text-align: center; vertical-align: middle;">
           <div style="font-size: 11px; font-weight: bold;">Inspección 17 puntos, sello y seguridad agrícola</div>
         </td>
         <td style="width: 25%; font-size: 8px; vertical-align: middle;">
@@ -226,52 +238,20 @@
       </tr>
     </table>
 
-    <div style="font-size: 7.5px; text-align: center; font-style: italic; margin-bottom: 2px;">
+    <div style="background: #e2e8f0; border: 1px solid #000; padding: 2px; text-align: center; font-size: 8px; font-weight: bold; margin-bottom: 2px;">
       La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
     </div>
 
-    <!-- Diagrama del Camión Oficial -->
-    <div style="border: 1px solid #000; padding: 2px; text-align: center; margin-bottom: 2px;">
-      <svg viewBox="0 0 700 170" style="width: 100%; max-height: 120px;">
-        <path d="M 40 110 L 660 110 L 660 30 L 440 30 L 440 55 L 180 55 L 140 55 L 100 55 L 40 85 Z" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M 440 30 L 440 110 M 140 55 L 140 110" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>
-        
-        <circle cx="80" cy="120" r="14" fill="none" stroke="#000" stroke-width="1.5"/>
-        <circle cx="210" cy="120" r="14" fill="none" stroke="#000" stroke-width="1.5"/>
-        <circle cx="245" cy="120" r="14" fill="none" stroke="#000" stroke-width="1.5"/>
-        <circle cx="530" cy="120" r="14" fill="none" stroke="#000" stroke-width="1.5"/>
-        <circle cx="565" cy="120" r="14" fill="none" stroke="#000" stroke-width="1.5"/>
-
-        <g fill="#000" font-weight="bold" font-size="10" text-anchor="middle">
-          <circle cx="45" cy="95" r="8" fill="#fff" stroke="#000"/><text x="45" y="98">1</text>
-          <circle cx="75" cy="70" r="8" fill="#fff" stroke="#000"/><text x="75" y="73">2</text>
-          <circle cx="80" cy="140" r="8" fill="#fff" stroke="#000"/><text x="80" y="143">3</text>
-          <circle cx="115" cy="100" r="8" fill="#fff" stroke="#000"/><text x="115" y="103">4</text>
-          <circle cx="155" cy="95" r="8" fill="#fff" stroke="#000"/><text x="155" y="98">5</text>
-          <circle cx="110" cy="75" r="8" fill="#fff" stroke="#000"/><text x="110" y="78">6</text>
-          <circle cx="185" cy="95" r="8" fill="#fff" stroke="#000"/><text x="185" y="98">7</text>
-          <circle cx="230" cy="140" r="8" fill="#fff" stroke="#000"/><text x="230" y="143">8</text>
-          <circle cx="295" cy="105" r="8" fill="#fff" stroke="#000"/><text x="295" y="108">9</text>
-          <circle cx="360" cy="112" r="8" fill="#fff" stroke="#000"/><text x="360" y="115">10</text>
-          <circle cx="650" cy="70" r="8" fill="#fff" stroke="#000"/><text x="650" y="73">11</text>
-          <circle cx="490" cy="100" r="8" fill="#fff" stroke="#000"/><text x="490" y="103">12</text>
-          <circle cx="535" cy="70" r="8" fill="#fff" stroke="#000"/><text x="535" y="73">13</text>
-          <circle cx="450" cy="70" r="8" fill="#fff" stroke="#000"/><text x="450" y="73">14</text>
-          <circle cx="535" cy="22" r="8" fill="#fff" stroke="#000"/><text x="535" y="25">15</text>
-          <circle cx="430" cy="45" r="8" fill="#fff" stroke="#000"/><text x="430" y="48">16</text>
-          <circle cx="95" cy="45" r="8" fill="#fff" stroke="#000"/><text x="95" y="48">17</text>
-        </g>
-      </svg>
-      <div style="font-size: 7px; border-top: 1px solid #000; padding-top: 2px;">
-        <strong>1.- Defensa | 2.- Motor | 3.- Llantas | 4.- Piso (del camión) | 5.- Tanque de combustible | 6.- Cabina | 7.- Tanque de aire | 8.- Ejes de acción | 9.- Llanta de repuesto | 10.- Exteriores/tren de rodaje | 11.- Puertas por dentro/fuera | 12.- Piso (de la caja) | 13.- Paredes laterales | 14.- Pared frontal | 15.- Techo | 16.- Unidad de refrigeración | 17.- Escape</strong>
-      </div>
+    <!-- Foto Real del Tráiler Oficial TICSA -->
+    <div class="trailer-box">
+      <img src="trailer.png" class="trailer-img-oficial" alt="Tráiler de Inspección 17 Puntos">
     </div>
 
     <div style="font-size: 7.5px; text-align: center; margin-bottom: 2px;">
       Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones
     </div>
 
-    <!-- Tablas 17 Puntos y Agrícola Frente a Frente -->
+    <!-- Tablas 17 Puntos y Agrícola Lado a Lado -->
     <table class="tbl-print-border">
       <thead>
         <tr>
@@ -289,7 +269,7 @@
       <tbody id="f_bodySideBySide"></tbody>
     </table>
 
-    <!-- Campo Basura -->
+    <!-- Campo Basura y Observaciones -->
     <table class="tbl-print-border" style="margin-top: 2px;">
       <tr>
         <td>
