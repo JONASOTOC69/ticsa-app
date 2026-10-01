@@ -30,81 +30,144 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <!-- BARRA SUPERIOR ORIGINAL -->
+  <!-- BARRA SUPERIOR CON NAVEGACIÓN -->
   <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto flex justify-between items-center">
+    <div class="max-w-5xl mx-auto flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center gap-3">
         <div class="bg-amber-400 text-slate-900 font-black text-xl px-3 py-1 rounded shadow">TICSA</div>
         <div>
           <h1 class="font-bold text-base leading-tight">Sistema de Inspecciones Cloud</h1>
-          <p class="text-xs text-slate-400">Sincronizado Celular / PC (SGS-PTICSA-050-F01)</p>
+          <p class="text-xs text-slate-400">SGS-PTICSA-050-F01 Rev.01</p>
         </div>
       </div>
       <div class="flex gap-2">
-        <button onclick="resetForm()" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded font-medium">Limpiar</button>
-        <button onclick="saveInspection(true)" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold">Guardar en Nube</button>
-        <button onclick="saveAndPrint()" class="px-3 py-1.5 text-xs bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">Guardar e Imprimir PDF</button>
+        <button onclick="switchTab('nueva')" id="btnTabNueva" class="px-3 py-1.5 text-xs bg-amber-400 text-slate-900 font-bold rounded">✚ Nueva Inspección</button>
+        <button onclick="switchTab('historial')" id="btnTabHistorial" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-white font-bold rounded flex items-center gap-1">📁 Historial Cloud <span id="badgeHistorial" class="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-full text-[10px]">0</span></button>
       </div>
     </div>
   </header>
 
   <main class="max-w-5xl mx-auto p-4 space-y-6">
 
-    <!-- DATOS GENERALES -->
-    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-      <h2 class="font-bold text-slate-700 text-sm flex items-center gap-2">📋 Datos Generales de la Unidad</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. TRACTO *</label><input type="text" id="no_tracto" placeholder="Ej. 11" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS TRACTO *</label><input type="text" id="placas_tracto" placeholder="Ej. 38452" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. CAJA</label><input type="text" id="no_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS CAJA</label><input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">OPERADOR *</label><input type="text" id="operador" placeholder="Ej. MARCOS" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">FECHA *</label><input type="date" id="fecha" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">HORA *</label><input type="time" id="hora" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-        <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+    <!-- SECCIÓN 1: NUEVA INSPECCIÓN -->
+    <div id="viewNueva" class="space-y-6">
+      
+      <!-- BOTONES DE ACCIÓN SUPERIOR -->
+      <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+        <span class="text-xs font-bold text-slate-500">FORMATO DE INSPECCIÓN RÁPIDA</span>
+        <div class="flex gap-2">
+          <button onclick="resetForm()" class="px-3 py-1.5 text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold">Limpiar</button>
+          <button onclick="saveInspection(true)" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold">Guardar en Nube</button>
+          <button onclick="saveAndPrint()" class="px-3 py-1.5 text-xs bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">Guardar e Imprimir PDF</button>
+        </div>
       </div>
-      <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-    </section>
 
-    <!-- 17 PUNTOS DE INSPECCIÓN -->
-    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-      <div class="flex justify-between items-center">
-        <h2 class="font-bold text-slate-700 text-sm">📋 Tabla de 17 Puntos de Inspección</h2>
-      </div>
-      <div id="points-container" class="space-y-2"></div>
-    </section>
+      <!-- DATOS GENERALES -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="font-bold text-slate-700 text-sm">📋 Datos Generales de la Unidad</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. TRACTO *</label><input type="text" id="no_tracto" placeholder="Ej. 11" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS TRACTO *</label><input type="text" id="placas_tracto" placeholder="Ej. 38452" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. CAJA</label><input type="text" id="no_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS CAJA</label><input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">OPERADOR *</label><input type="text" id="operador" placeholder="Ej. MARCOS" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">FECHA *</label><input type="date" id="fecha" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">HORA *</label><input type="time" id="hora" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        </div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+      </section>
 
-    <!-- SEGURIDAD AGRÍCOLA -->
-    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-      <h2 class="font-bold text-slate-700 text-sm">🌾 Inspección de Seguridad Agrícola</h2>
-      <div id="agri-points-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
-      <div class="pt-3">
-        <label class="block text-xs font-bold text-slate-500 mb-1">BASURA EN CABINA GENERADA POR EL OPERADOR (ESPECIFIQUE):</label>
-        <input type="text" id="agri_basura" placeholder="Ej. Sin novedad" class="w-full border rounded p-2 text-sm bg-slate-50">
-      </div>
-    </section>
+      <!-- 17 PUNTOS DE INSPECCIÓN (CON ATAJOS TRACTO / CAJA) -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-wrap justify-between items-center gap-2 pb-2 border-b">
+          <h2 class="font-bold text-slate-700 text-sm">📋 Tabla de 17 Puntos de Inspección</h2>
+          <div class="flex gap-2">
+            <button onclick="setQuickPoints('tracto_only')" type="button" class="px-2.5 py-1 text-xs bg-slate-800 text-white font-bold rounded hover:bg-slate-700">🚛 Solo Tracto (1-10)</button>
+            <button onclick="setQuickPoints('unmark_caja')" type="button" class="px-2.5 py-1 text-xs bg-amber-500 text-slate-900 font-bold rounded hover:bg-amber-400">📦 Desmarcar Caja (11-16)</button>
+            <button onclick="setQuickPoints('all_ok')" type="button" class="px-2.5 py-1 text-xs bg-emerald-700 text-white font-bold rounded hover:bg-emerald-600">✓ Marcar Todo OK</button>
+          </div>
+        </div>
+        <div id="points-container" class="space-y-2"></div>
+      </section>
 
-    <!-- OBSERVACIONES Y FIRMA -->
-    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-slate-500 mb-1">OBSERVACIONES ADICIONALES:</label>
-        <textarea id="observaciones" rows="2" placeholder="Escriba observaciones adicionales..." class="w-full border rounded p-2 text-sm bg-slate-50"></textarea>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-500 mb-1">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
-        <canvas id="signaturePad" width="350" height="120" class="border border-slate-300 rounded bg-slate-50 cursor-crosshair touch-none"></canvas>
-        <button onclick="clearSignature()" class="text-xs text-slate-500 underline mt-1 block">Limpiar Firma</button>
-      </div>
-    </section>
+      <!-- SEGURIDAD AGRÍCOLA -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h2 class="font-bold text-slate-700 text-sm">🌾 Inspección de Seguridad Agrícola</h2>
+          <button onclick="setAgriAllOk()" type="button" class="px-2.5 py-1 text-xs bg-emerald-700 text-white font-bold rounded hover:bg-emerald-600">✓ Marcar Todo Limpio</button>
+        </div>
+        <div id="agri-points-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+        <div class="pt-3">
+          <label class="block text-xs font-bold text-slate-500 mb-1">BASURA EN CABINA GENERADA POR EL OPERADOR (ESPECIFIQUE):</label>
+          <input type="text" id="agri_basura" placeholder="Ej. Sin novedad" class="w-full border rounded p-2 text-sm bg-slate-50">
+        </div>
+      </section>
 
-    <div class="flex justify-end gap-3 pb-10">
-      <button onclick="saveInspection(true)" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-lg shadow">Guardar en Nube</button>
-      <button onclick="saveAndPrint()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm rounded-lg shadow">Guardar e Imprimir PDF</button>
+      <!-- OBSERVACIONES Y FIRMA -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">OBSERVACIONES ADICIONALES:</label>
+          <textarea id="observaciones" rows="2" placeholder="Escriba observaciones adicionales..." class="w-full border rounded p-2 text-sm bg-slate-50"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
+          <canvas id="signaturePad" width="350" height="120" class="border border-slate-300 rounded bg-slate-50 cursor-crosshair touch-none"></canvas>
+          <button onclick="clearSignature()" class="text-xs text-slate-500 underline mt-1 block">Limpiar Firma</button>
+        </div>
+      </section>
+
+      <div class="flex justify-end gap-3 pb-10">
+        <button onclick="saveInspection(true)" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-lg shadow">Guardar en Nube</button>
+        <button onclick="saveAndPrint()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm rounded-lg shadow">Guardar e Imprimir PDF</button>
+      </div>
+
+    </div>
+
+    <!-- SECCIÓN 2: HISTORIAL Y FILTRO POR FECHAS -->
+    <div id="viewHistorial" class="space-y-4" style="display:none;">
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="font-bold text-slate-700 text-base">🔍 Historial de Inspecciones Guardadas en la Nube</h2>
+        
+        <!-- BARRA DE FILTROS POR FECHA Y TEXTO -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500">DESDE (FECHA):</label>
+            <input type="date" id="filterDesde" onchange="applyFilters()" class="w-full border rounded p-1.5 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500">HASTA (FECHA):</label>
+            <input type="date" id="filterHasta" onchange="applyFilters()" class="w-full border rounded p-1.5 text-xs">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-[10px] font-bold text-slate-500">BUSCAR POR TRACTO, CAJA U OPERADOR:</label>
+            <input type="text" id="filterSearch" onkeyup="applyFilters()" placeholder="Ej. 11, Marcos..." class="w-full border rounded p-1.5 text-xs">
+          </div>
+        </div>
+
+        <!-- TABLA HISTORIAL -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-800 text-white font-bold">
+              <tr>
+                <th class="p-2.5">FECHA / HORA</th>
+                <th class="p-2.5">TRACTO / CAJA</th>
+                <th class="p-2.5">OPERADOR</th>
+                <th class="p-2.5">INSPECTOR</th>
+                <th class="p-2.5 text-center">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="historialTableBody" class="divide-y border-b">
+              <!-- Carga dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
   </main>
 
-  <!-- PLANTILLA DE IMPRESIÓN FORMATO OFICIAL -->
+  <!-- PLANTILLA IMPRESIÓN FORMATO OFICIAL SGS-PTICSA-050-F01 -->
   <div id="formatoImpresionOficial">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:4px; margin-bottom:6px;">
       <div style="font-weight:900; font-size:18px; background:#FFB800; padding:2px 8px;">TICSA</div>
@@ -168,12 +231,24 @@
     </div>
   </div>
 
-  <!-- LÓGICA DE DIBUJO DE PUNTOS Y FIREBASE -->
   <script>
+    // FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSy...",
+      authDomain: "ctpat-cb043.firebaseapp.com",
+      projectId: "ctpat-cb043",
+      storageBucket: "ctpat-cb043.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcde"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const POINTS = ["Defensa", "Motor", "Llantas", "Piso (del camión)", "Tanque de combustible", "Cabina", "Tanque de aire", "Ejes de acción", "Llanta de repuesto", "Exteriores/ tren de rodaje", "Puertas por dentro/fuera", "Piso (de la caja)", "Paredes laterales", "Pared frontal", "Techo", "Unidad de refrigeración", "Escape"];
     const AGRI_ITEMS = ["Insectos vivos o muertos", "Moho", "Hojas, ramitas, corteza", "Huevecillos", "Carne", "Sangre", "Huesos", "Pelo", "Secreciones", "Excreciones", "Frutas", "Semillas", "Hongos", "Lodo", "Animal vivo o muerto: liebre, serpiente"];
 
-    let pointStates = {}, agriStates = {};
+    let pointStates = {}, agriStates = {}, recordsData = [];
 
     function initForm() {
       const pCont = document.getElementById('points-container');
@@ -205,7 +280,6 @@
           </div>`;
       });
 
-      // Fecha y hora por defecto
       const now = new Date();
       document.getElementById('fecha').value = now.toISOString().substring(0, 10);
       document.getElementById('hora').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -218,13 +292,30 @@
       document.getElementById(`p_na_${idx}`).className = `px-2 py-1 rounded ${st==='na'?'bg-slate-600 text-white font-bold':'bg-slate-200'}`;
     }
 
+    // OPCIONES RÁPIDAS (DESMARCAR CAJA / SOLO TRACTO)
+    function setQuickPoints(type) {
+      POINTS.forEach((_, idx) => {
+        if (type === 'all_ok') {
+          setPointStatus(idx, 'ok');
+        } else if (type === 'tracto_only') {
+          setPointStatus(idx, idx < 10 ? 'ok' : 'na');
+        } else if (type === 'unmark_caja') {
+          if (idx >= 10 && idx <= 15) setPointStatus(idx, 'na');
+        }
+      });
+    }
+
     function setAgriStatus(idx, st) {
       agriStates[idx] = st;
       document.getElementById(`a_ok_${idx}`).className = `px-2 py-1 rounded ${st==='ok'?'bg-emerald-600 text-white font-bold':'bg-slate-200'}`;
       document.getElementById(`a_fail_${idx}`).className = `px-2 py-1 rounded ${st==='fail'?'bg-rose-600 text-white font-bold':'bg-slate-200'}`;
     }
 
-    // Canvas Firma
+    function setAgriAllOk() {
+      AGRI_ITEMS.forEach((_, idx) => setAgriStatus(idx, 'ok'));
+    }
+
+    // CANVAS FIRMA
     const canvas = document.getElementById('signaturePad');
     const ctx = canvas.getContext('2d');
     let drawing = false;
@@ -238,45 +329,144 @@
     });
     function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath(); }
 
-    function saveAndPrint() {
-      // Sincronización a plantilla de impresión
-      document.getElementById('f_tracto').innerText = document.getElementById('no_tracto').value;
-      document.getElementById('f_placasTracto').innerText = document.getElementById('placas_tracto').value;
-      document.getElementById('f_caja').innerText = document.getElementById('no_caja').value;
-      document.getElementById('f_placasCaja').innerText = document.getElementById('placas_caja').value;
-      document.getElementById('f_operador').innerText = document.getElementById('operador').value;
-      document.getElementById('f_fecha').innerText = document.getElementById('fecha').value;
-      document.getElementById('f_hora').innerText = document.getElementById('hora').value;
-      document.getElementById('f_sello').innerText = document.getElementById('sello_numero').value;
-      document.getElementById('f_inspector').innerText = document.getElementById('oficial_nombre').value;
-      document.getElementById('f_basura').innerText = document.getElementById('agri_basura').value || 'Sin novedad';
-      document.getElementById('f_obs').innerText = document.getElementById('observaciones').value;
-      document.getElementById('f_imgFirma').src = canvas.toDataURL();
+    // GUARDAR EN FIREBASE
+    async function saveInspection(showAlert = true) {
+      const data = {
+        no_tracto: document.getElementById('no_tracto').value,
+        placas_tracto: document.getElementById('placas_tracto').value,
+        no_caja: document.getElementById('no_caja').value,
+        placas_caja: document.getElementById('placas_caja').value,
+        operador: document.getElementById('operador').value,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        sello_numero: document.getElementById('sello_numero').value,
+        oficial_nombre: document.getElementById('oficial_nombre').value,
+        agri_basura: document.getElementById('agri_basura').value,
+        observaciones: document.getElementById('observaciones').value,
+        pointStates, agriStates,
+        signature: canvas.toDataURL(),
+        timestamp: new Date().getTime()
+      };
 
-      // Rellenar 17 Puntos Impresión
+      try {
+        await db.collection('inspecciones').add(data);
+        if(showAlert) alert('¡Inspección guardada con éxito en la Nube!');
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    // ESCUCHAR HISTORIAL EN VIVO
+    db.collection('inspecciones').onSnapshot(snap => {
+      recordsData = [];
+      snap.forEach(doc => recordsData.push({ id: doc.id, ...doc.data() }));
+      document.getElementById('badgeHistorial').innerText = recordsData.length;
+      applyFilters();
+    });
+
+    // FILTRO Y BÚSQUEDA
+    function applyFilters() {
+      const desde = document.getElementById('filterDesde').value;
+      const hasta = document.getElementById('filterHasta').value;
+      const text = document.getElementById('filterSearch').value.toLowerCase();
+
+      const filtered = recordsData.filter(r => {
+        const matchText = (r.no_tracto || '').toLowerCase().includes(text) || 
+                          (r.no_caja || '').toLowerCase().includes(text) || 
+                          (r.operador || '').toLowerCase().includes(text);
+        
+        let matchDate = true;
+        if (desde && r.fecha < desde) matchDate = false;
+        if (hasta && r.fecha > hasta) matchDate = false;
+
+        return matchText && matchDate;
+      });
+
+      renderHistoryTable(filtered);
+    }
+
+    function renderHistoryTable(data) {
+      const tbody = document.getElementById('historialTableBody');
+      tbody.innerHTML = '';
+      if(data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No se encontraron inspecciones.</td></tr>';
+        return;
+      }
+
+      data.forEach(r => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50">
+            <td class="p-2.5"><strong>${r.fecha || ''}</strong><br><span class="text-[10px] text-slate-400">${r.hora || ''}</span></td>
+            <td class="p-2.5">Tracto: <strong>${r.no_tracto || '-'}</strong><br>Caja: ${r.no_caja || '-'}</td>
+            <td class="p-2.5">${r.operador || '-'}</td>
+            <td class="p-2.5">${r.oficial_nombre || '-'}</td>
+            <td class="p-2.5 text-center flex justify-center gap-2">
+              <button onclick="reprintFromHistory('${r.id}')" class="px-2 py-1 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">🖨️ PDF</button>
+              <button onclick="deleteRecord('${r.id}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded font-bold">🗑️</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function reprintFromHistory(id) {
+      const r = recordsData.find(item => item.id === id);
+      if(!r) return;
+
+      document.getElementById('f_tracto').innerText = r.no_tracto || '';
+      document.getElementById('f_placasTracto').innerText = r.placas_tracto || '';
+      document.getElementById('f_caja').innerText = r.no_caja || '';
+      document.getElementById('f_placasCaja').innerText = r.placas_caja || '';
+      document.getElementById('f_operador').innerText = r.operador || '';
+      document.getElementById('f_fecha').innerText = r.fecha || '';
+      document.getElementById('f_hora').innerText = r.hora || '';
+      document.getElementById('f_sello').innerText = r.sello_numero || '';
+      document.getElementById('f_inspector').innerText = r.oficial_nombre || '';
+      document.getElementById('f_basura').innerText = r.agri_basura || 'Sin novedad';
+      document.getElementById('f_obs').innerText = r.observaciones || '';
+      if (r.signature) document.getElementById('f_imgFirma').src = r.signature;
+
       const pBody = document.getElementById('f_bodyPuntos');
       pBody.innerHTML = '';
+      const ps = r.pointStates || {};
       for (let i = 0; i < 9; i++) {
         pBody.innerHTML += `
           <tr>
-            <td>${i+1}</td><td>${POINTS[i]}</td><td style="text-align:center;"><strong>${pointStates[i]==='ok'?'✓':pointStates[i]==='fail'?'X':'N/A'}</strong></td>
-            <td>${POINTS[i+9]?i+10:''}</td><td>${POINTS[i+9]||''}</td><td style="text-align:center;"><strong>${pointStates[i+9]?(pointStates[i+9]==='ok'?'✓':pointStates[i+9]==='fail'?'X':'N/A'):''}</strong></td>
+            <td>${i+1}</td><td>${POINTS[i]}</td><td style="text-align:center;"><strong>${ps[i]==='ok'?'✓':ps[i]==='fail'?'X':'N/A'}</strong></td>
+            <td>${POINTS[i+9]?i+10:''}</td><td>${POINTS[i+9]||''}</td><td style="text-align:center;"><strong>${ps[i+9]?(ps[i+9]==='ok'?'✓':ps[i+9]==='fail'?'X':'N/A'):''}</strong></td>
           </tr>`;
       }
 
-      // Rellenar Seguridad Agrícola Impresión
       const aBody = document.getElementById('f_bodyAgricola');
       aBody.innerHTML = '';
+      const as = r.agriStates || {};
       for (let i = 0; i < AGRI_ITEMS.length; i += 3) {
         aBody.innerHTML += `
           <tr>
-            <td>${AGRI_ITEMS[i]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i]==='ok'?'✓':'X'}</strong></td>
-            <td>${AGRI_ITEMS[i+1]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i+1]?(agriStates[i+1]==='ok'?'✓':'X'):''}</strong></td>
-            <td>${AGRI_ITEMS[i+2]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i+2]?(agriStates[i+2]==='ok'?'✓':'X'):''}</strong></td>
+            <td>${AGRI_ITEMS[i]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i]==='ok'?'✓':'X'}</strong></td>
+            <td>${AGRI_ITEMS[i+1]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i+1]?(as[i+1]==='ok'?'✓':'X'):''}</strong></td>
+            <td>${AGRI_ITEMS[i+2]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i+2]?(as[i+2]==='ok'?'✓':'X'):''}</strong></td>
           </tr>`;
       }
 
       setTimeout(() => { window.print(); }, 300);
+    }
+
+    async function deleteRecord(id) {
+      if(confirm('¿Seguro que deseas eliminar esta inspección?')) {
+        await db.collection('inspecciones').doc(id).delete();
+      }
+    }
+
+    function saveAndPrint() {
+      saveInspection(false);
+      reprintFromHistory();
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewNueva').style.display = tab === 'nueva' ? 'block' : 'none';
+      document.getElementById('viewHistorial').style.display = tab === 'historial' ? 'block' : 'none';
+      document.getElementById('btnTabNueva').className = `px-3 py-1.5 text-xs font-bold rounded ${tab==='nueva'?'bg-amber-400 text-slate-900':'bg-slate-700 text-white'}`;
+      document.getElementById('btnTabHistorial').className = `px-3 py-1.5 text-xs font-bold rounded flex items-center gap-1 ${tab==='historial'?'bg-amber-400 text-slate-900':'bg-slate-700 text-white'}`;
     }
 
     function resetForm() {
