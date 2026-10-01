@@ -20,10 +20,21 @@
   <style>
     @media print {
       body > *:not(#formatoImpresionOficial) { display: none !important; }
-      #formatoImpresionOficial { display: block !important; font-family: Arial, sans-serif; color: #000; width: 100%; }
-      .tbl-imp { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 6px; }
-      .tbl-imp th, .tbl-imp td { border: 1px solid #000; padding: 3px 4px; text-align: left; }
-      .tbl-imp th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+      #formatoImpresionOficial { display: block !important; font-family: Arial, sans-serif; color: #000; width: 100%; padding: 0; margin: 0; }
+      
+      .tbl-hdr-oficial { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+      .tbl-hdr-oficial td { border: 1px solid #000; padding: 4px; vertical-align: middle; }
+
+      .tbl-datos-oficial { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 10px; }
+      .tbl-datos-oficial td { border: 1px solid #000; padding: 3px 5px; width: 33.33%; }
+
+      .trailer-container { width: 100%; text-align: center; border: 1px solid #000; padding: 4px; margin-bottom: 6px; }
+
+      .side-by-side-table { width: 100%; border-collapse: collapse; font-size: 9px; margin-bottom: 6px; }
+      .side-by-side-table th, .side-by-side-table td { border: 1px solid #000; padding: 2px 4px; }
+      .side-by-side-table th { background-color: #e6e6e6 !important; -webkit-print-color-adjust: exact; font-weight: bold; text-align: center; }
+      
+      .mark-check { text-align: center; font-weight: bold; width: 25px; }
     }
     #formatoImpresionOficial { display: none; }
   </style>
@@ -158,7 +169,6 @@
               </tr>
             </thead>
             <tbody id="historialTableBody" class="divide-y border-b">
-              <!-- Carga dinámicamente -->
             </tbody>
           </table>
         </div>
@@ -167,22 +177,40 @@
 
   </main>
 
-  <!-- PLANTILLA IMPRESIÓN FORMATO OFICIAL SGS-PTICSA-050-F01 -->
-  <div id="formatoImpresionOficial">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:4px; margin-bottom:6px;">
-      <div style="font-weight:900; font-size:18px; background:#FFB800; padding:2px 8px;">TICSA</div>
-      <div style="font-weight:bold; font-size:12px; text-align:center;">Inspección 17 puntos, sello y seguridad agrícola</div>
-      <div style="font-size:8px; text-align:right;"><strong>SGS-PTICSA-050-F01</strong><br>Rev.01</div>
-    </div>
+  <!-- PLANTILLA DE IMPRESIÓN IDÉNTICA AL FORMATO OFICIAL TICSA -->
+  <div id="formatoImpresionOficial" class="print-page">
 
-    <table class="tbl-imp">
+    <!-- ENCABEZADO OFICIAL CON LOGO -->
+    <table class="tbl-hdr-oficial">
+      <tr>
+        <td style="width: 25%; text-align: center;">
+          <div style="font-weight: 900; font-size: 22px; color: #000; letter-spacing: 1px;">
+            <span style="background: #FFB800; padding: 2px 8px; border-radius: 4px;">TICSA</span>
+          </div>
+        </td>
+        <td style="width: 50%; text-align: center;">
+          <div style="font-weight: bold; font-size: 12px; text-transform: uppercase;">
+            Inspección 17 puntos, sello y seguridad agrícola
+          </div>
+          <div style="font-size: 8px; font-style: italic; margin-top: 2px;">
+            La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
+          </div>
+        </td>
+        <td style="width: 25%; text-align: right; font-size: 8px;">
+          <strong>SGS-PTICSA-050-F01</strong><br>Rev.01
+        </td>
+      </tr>
+    </table>
+
+    <!-- REJILLA DE DATOS DE UNIDAD -->
+    <table class="tbl-datos-oficial">
       <tr>
         <td><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
-        <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
+        <td><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
         <td><strong>Hora:</strong> <span id="f_hora"></span></td>
       </tr>
       <tr>
-        <td><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
+        <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
         <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
         <td><strong>Fecha:</strong> <span id="f_fecha"></span></td>
       </tr>
@@ -192,43 +220,89 @@
       </tr>
     </table>
 
-    <div style="font-size:8px; font-style:italic; margin-bottom:4px;">La inspección debe completarse y documentarse en todos los contenedores y tractos.</div>
+    <!-- DIAGRAMA DEL TRÁILER CON NÚMEROS ROJOS -->
+    <div class="trailer-container">
+      <svg viewBox="0 0 750 200" style="width: 100%; max-height: 140px;">
+        <path d="M 50 130 L 700 130 L 700 40 L 480 40 L 480 70 L 200 70 L 160 70 L 120 70 L 50 100 Z" fill="#f8fafc" stroke="#000" stroke-width="2"/>
+        <path d="M 480 40 L 480 130 M 160 70 L 160 130 M 120 70 L 120 130" stroke="#000" stroke-width="1.5" stroke-dasharray="3,3"/>
+        
+        <circle cx="100" cy="140" r="16" fill="#333"/><circle cx="100" cy="140" r="7" fill="#fff"/>
+        <circle cx="240" cy="140" r="16" fill="#333"/><circle cx="240" cy="140" r="7" fill="#fff"/>
+        <circle cx="280" cy="140" r="16" fill="#333"/><circle cx="280" cy="140" r="7" fill="#fff"/>
+        <circle cx="580" cy="140" r="16" fill="#333"/><circle cx="580" cy="140" r="7" fill="#fff"/>
+        <circle cx="620" cy="140" r="16" fill="#333"/><circle cx="620" cy="140" r="7" fill="#fff"/>
 
-    <div style="font-weight:bold; font-size:9px; margin-bottom:2px;">17 Puntos de inspección</div>
-    <table class="tbl-imp">
+        <g fill="#dc2626" font-weight="bold" font-size="12" text-anchor="middle">
+          <circle cx="55" cy="115" r="10" fill="#fff" stroke="#dc2626"/><text x="55" y="119">1</text>
+          <circle cx="90" cy="85" r="10" fill="#fff" stroke="#dc2626"/><text x="90" y="89">2</text>
+          <circle cx="100" cy="165" r="10" fill="#fff" stroke="#dc2626"/><text x="100" y="169">3</text>
+          <circle cx="135" cy="120" r="10" fill="#fff" stroke="#dc2626"/><text x="135" y="124">4</text>
+          <circle cx="180" cy="115" r="10" fill="#fff" stroke="#dc2626"/><text x="180" y="119">5</text>
+          <circle cx="130" cy="90" r="10" fill="#fff" stroke="#dc2626"/><text x="130" y="94">6</text>
+          <circle cx="210" cy="115" r="10" fill="#fff" stroke="#dc2626"/><text x="210" y="119">7</text>
+          <circle cx="260" cy="165" r="10" fill="#fff" stroke="#dc2626"/><text x="260" y="169">8</text>
+          <circle cx="330" cy="125" r="10" fill="#fff" stroke="#dc2626"/><text x="330" y="129">9</text>
+          <circle cx="400" cy="135" r="10" fill="#fff" stroke="#dc2626"/><text x="400" y="139">10</text>
+          <circle cx="690" cy="85" r="10" fill="#fff" stroke="#dc2626"/><text x="690" y="89">11</text>
+          <circle cx="530" cy="120" r="10" fill="#fff" stroke="#dc2626"/><text x="530" y="124">12</text>
+          <circle cx="580" cy="85" r="10" fill="#fff" stroke="#dc2626"/><text x="580" y="89">13</text>
+          <circle cx="490" cy="85" r="10" fill="#fff" stroke="#dc2626"/><text x="490" y="89">14</text>
+          <circle cx="580" cy="30" r="10" fill="#fff" stroke="#dc2626"/><text x="580" y="34">15</text>
+          <circle cx="470" cy="55" r="10" fill="#fff" stroke="#dc2626"/><text x="470" y="59">16</text>
+          <circle cx="115" cy="60" r="10" fill="#fff" stroke="#dc2626"/><text x="115" y="64">17</text>
+        </g>
+      </svg>
+    </div>
+
+    <div style="font-size: 7.5px; margin-bottom: 4px; text-align: center;">
+      Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones
+    </div>
+
+    <!-- TABLAS LADO A LADO (2 COLUMNAS OFICIALES) -->
+    <table class="side-by-side-table">
       <thead>
         <tr>
-          <th style="width:15px;">#</th><th>Punto</th><th style="width:25px; text-align:center;">Estatus</th>
-          <th style="width:15px;">#</th><th>Punto</th><th style="width:25px; text-align:center;">Estatus</th>
+          <th colspan="3" style="width: 50%;">17 Puntos de inspección</th>
+          <th colspan="2" style="width: 50%;">Seguridad agrícola</th>
+        </tr>
+        <tr>
+          <th style="width: 20px;">#</th>
+          <th>Punto</th>
+          <th style="width: 25px;">Estatus</th>
+          <th>Punto</th>
+          <th style="width: 25px;">Estatus</th>
         </tr>
       </thead>
-      <tbody id="f_bodyPuntos"></tbody>
+      <tbody id="f_bodySideBySide">
+      </tbody>
     </table>
 
-    <div style="font-size:8px; margin-bottom:4px;">Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad.</div>
-
-    <div style="font-weight:bold; font-size:9px; margin-bottom:2px;">Seguridad agrícola</div>
-    <table class="tbl-imp">
-      <tbody id="f_bodyAgricola"></tbody>
-    </table>
-
-    <table class="tbl-imp" style="margin-top:4px;">
+    <!-- OBSERVACIONES Y BASURA -->
+    <table class="tbl-datos-oficial" style="margin-top: 4px;">
       <tr>
         <td>
-          <strong>Basura en cabina generada por el operador:</strong> <span id="f_basura"></span><br>
+          <strong>Basura en cabina generada por el operador (especifique):</strong> <span id="f_basura"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
           <strong>Observaciones adicionales:</strong> <span id="f_obs"></span>
         </td>
       </tr>
     </table>
 
-    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:flex-end;">
+    <!-- PIE DE PÁGINA Y FIRMA -->
+    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
       <div>
-        <strong>firma del oficial de seguridad:</strong><br>
-        <img id="f_imgFirma" style="max-height:35px; border-bottom:1px solid #000; margin-top:2px;"><br>
+        <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-bottom: 2px;"><br>
+        <strong>firma del oficial de seguridad</strong><br>
         <strong>Nombre:</strong> <span id="f_inspector"></span>
       </div>
-      <div style="font-size:8px; font-weight:bold;">SGS-PTICSA-050-F01 Rev.01</div>
+      <div style="font-size: 8px; font-weight: bold; text-align: right;">
+        SGS-PTICSA-050-F01<br>Rev.01
+      </div>
     </div>
+
   </div>
 
   <script>
@@ -292,7 +366,6 @@
       document.getElementById(`p_na_${idx}`).className = `px-2 py-1 rounded ${st==='na'?'bg-slate-600 text-white font-bold':'bg-slate-200'}`;
     }
 
-    // OPCIONES RÁPIDAS (DESMARCAR CAJA / SOLO TRACTO)
     function setQuickPoints(type) {
       POINTS.forEach((_, idx) => {
         if (type === 'all_ok') {
@@ -329,7 +402,6 @@
     });
     function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath(); }
 
-    // GUARDAR EN FIREBASE
     async function saveInspection(showAlert = true) {
       const data = {
         no_tracto: document.getElementById('no_tracto').value,
@@ -356,7 +428,6 @@
       }
     }
 
-    // ESCUCHAR HISTORIAL EN VIVO
     db.collection('inspecciones').onSnapshot(snap => {
       recordsData = [];
       snap.forEach(doc => recordsData.push({ id: doc.id, ...doc.data() }));
@@ -364,7 +435,6 @@
       applyFilters();
     });
 
-    // FILTRO Y BÚSQUEDA
     function applyFilters() {
       const desde = document.getElementById('filterDesde').value;
       const hasta = document.getElementById('filterHasta').value;
@@ -408,46 +478,71 @@
       });
     }
 
+    function populatePrintSideBySide(data) {
+      document.getElementById('f_tracto').innerText = data.no_tracto || '';
+      document.getElementById('f_placasTracto').innerText = data.placas_tracto || '';
+      document.getElementById('f_caja').innerText = data.no_caja || '';
+      document.getElementById('f_placasCaja').innerText = data.placas_caja || '';
+      document.getElementById('f_operador').innerText = data.operador || '';
+      document.getElementById('f_fecha').innerText = data.fecha || '';
+      document.getElementById('f_hora').innerText = data.hora || '';
+      document.getElementById('f_sello').innerText = data.sello_numero || '';
+      document.getElementById('f_inspector').innerText = data.oficial_nombre || '';
+      document.getElementById('f_basura').innerText = data.agri_basura || 'Sin novedad';
+      document.getElementById('f_obs').innerText = data.observaciones || '';
+      if (data.signature) document.getElementById('f_imgFirma').src = data.signature;
+
+      const tbody = document.getElementById('f_bodySideBySide');
+      tbody.innerHTML = '';
+
+      const ps = data.pointStates || {};
+      const as = data.agriStates || {};
+
+      for (let i = 0; i < 17; i++) {
+        const pName = POINTS[i] || '';
+        const pStat = ps[i] === 'ok' ? '✓' : ps[i] === 'fail' ? 'X' : 'N/A';
+        
+        const aName = AGRI_ITEMS[i] || '';
+        const aStat = AGRI_ITEMS[i] ? (as[i] === 'ok' ? '✓' : 'X') : '';
+
+        tbody.innerHTML += `
+          <tr>
+            <td style="text-align: center; font-weight: bold;">${i + 1}</td>
+            <td>${pName}</td>
+            <td class="mark-check">${pStat}</td>
+            <td>${aName}</td>
+            <td class="mark-check">${aStat}</td>
+          </tr>`;
+      }
+    }
+
     function reprintFromHistory(id) {
       const r = recordsData.find(item => item.id === id);
       if(!r) return;
 
-      document.getElementById('f_tracto').innerText = r.no_tracto || '';
-      document.getElementById('f_placasTracto').innerText = r.placas_tracto || '';
-      document.getElementById('f_caja').innerText = r.no_caja || '';
-      document.getElementById('f_placasCaja').innerText = r.placas_caja || '';
-      document.getElementById('f_operador').innerText = r.operador || '';
-      document.getElementById('f_fecha').innerText = r.fecha || '';
-      document.getElementById('f_hora').innerText = r.hora || '';
-      document.getElementById('f_sello').innerText = r.sello_numero || '';
-      document.getElementById('f_inspector').innerText = r.oficial_nombre || '';
-      document.getElementById('f_basura').innerText = r.agri_basura || 'Sin novedad';
-      document.getElementById('f_obs').innerText = r.observaciones || '';
-      if (r.signature) document.getElementById('f_imgFirma').src = r.signature;
+      populatePrintSideBySide(r);
+      setTimeout(() => { window.print(); }, 300);
+    }
 
-      const pBody = document.getElementById('f_bodyPuntos');
-      pBody.innerHTML = '';
-      const ps = r.pointStates || {};
-      for (let i = 0; i < 9; i++) {
-        pBody.innerHTML += `
-          <tr>
-            <td>${i+1}</td><td>${POINTS[i]}</td><td style="text-align:center;"><strong>${ps[i]==='ok'?'✓':ps[i]==='fail'?'X':'N/A'}</strong></td>
-            <td>${POINTS[i+9]?i+10:''}</td><td>${POINTS[i+9]||''}</td><td style="text-align:center;"><strong>${ps[i+9]?(ps[i+9]==='ok'?'✓':ps[i+9]==='fail'?'X':'N/A'):''}</strong></td>
-          </tr>`;
-      }
+    function saveAndPrint() {
+      const currentData = {
+        no_tracto: document.getElementById('no_tracto').value,
+        placas_tracto: document.getElementById('placas_tracto').value,
+        no_caja: document.getElementById('no_caja').value,
+        placas_caja: document.getElementById('placas_caja').value,
+        operador: document.getElementById('operador').value,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        sello_numero: document.getElementById('sello_numero').value,
+        oficial_nombre: document.getElementById('oficial_nombre').value,
+        agri_basura: document.getElementById('agri_basura').value,
+        observaciones: document.getElementById('observaciones').value,
+        pointStates, agriStates,
+        signature: canvas.toDataURL()
+      };
 
-      const aBody = document.getElementById('f_bodyAgricola');
-      aBody.innerHTML = '';
-      const as = r.agriStates || {};
-      for (let i = 0; i < AGRI_ITEMS.length; i += 3) {
-        aBody.innerHTML += `
-          <tr>
-            <td>${AGRI_ITEMS[i]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i]==='ok'?'✓':'X'}</strong></td>
-            <td>${AGRI_ITEMS[i+1]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i+1]?(as[i+1]==='ok'?'✓':'X'):''}</strong></td>
-            <td>${AGRI_ITEMS[i+2]||''}</td><td style="text-align:center; width:20px;"><strong>${as[i+2]?(as[i+2]==='ok'?'✓':'X'):''}</strong></td>
-          </tr>`;
-      }
-
+      saveInspection(false);
+      populatePrintSideBySide(currentData);
       setTimeout(() => { window.print(); }, 300);
     }
 
@@ -455,11 +550,6 @@
       if(confirm('¿Seguro que deseas eliminar esta inspección?')) {
         await db.collection('inspecciones').doc(id).delete();
       }
-    }
-
-    function saveAndPrint() {
-      saveInspection(false);
-      reprintFromHistory();
     }
 
     function switchTab(tab) {
