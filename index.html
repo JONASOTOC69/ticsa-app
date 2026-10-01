@@ -1,993 +1,291 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- CONFIGURACIÓN PWA PARA INSTALAR COMO APP NATIVA (MÓVIL / TABLETA) -->
-    <title>TICSA - Inspecciones 17 Puntos</title>
-    <meta name="theme-color" content="#0b1329">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="TICSA App">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TICSA - Inspecciones C-TPAT</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 
-    <!-- MANIFIESTO WEB DINÁMICO (WEB APP MANIFEST) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"TICSA Inspecciones","short_name":"TICSA App","start_url":".","display":"standalone","background_color":"#0b1329","theme_color":"#0b1329","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\"><rect width=\"512\" height=\"512\" fill=\"%230b1329\" rx=\"100\"/><rect x=\"60\" y=\"180\" width=\"392\" height=\"180\" fill=\"%23d97706\" rx=\"20\"/><text x=\"256\" y=\"310\" font-family=\"sans-serif\" font-weight=\"900\" font-size=\"110\" fill=\"%23ffffff\" text-anchor=\"middle\">TICSA</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <!-- Tailwind CSS & Firebase -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <!-- Firebase SDK v10 (CTPAT Project) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCaMoxpbeGNLF3sKzDsSYSDNgo_cGofX64",
-            authDomain: "ctpat-cb043.firebaseapp.com",
-            projectId: "ctpat-cb043",
-            storageBucket: "ctpat-cb043.firebasestorage.app",
-            messagingSenderId: "147909305179",
-            appId: "1:147909305179:web:e362d1170e9bb2b1dbb07e"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const inspectionsRef = collection(db, "inspecciones_ticsa");
-
-        window.db = db;
-        window.inspectionsRef = inspectionsRef;
-        window.addDoc = addDoc;
-        window.deleteDoc = deleteDoc;
-        window.doc = doc;
-
-        const q = query(inspectionsRef, orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const records = [];
-            snapshot.forEach((doc) => {
-                records.push({ id: doc.id, ...doc.data() });
-            });
-            window.globalRecords = records;
-            if (window.renderHistory) window.renderHistory();
-        }, (error) => {
-            console.warn("Modo respaldo local activo:", error);
-        });
-    </script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
-
-        @media print {
-            body { background-color: #ffffff !important; color: #000000 !important; }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            @page { size: letter portrait; margin: 5mm; }
-        }
-        .print-only { display: none; }
-        .btn-status { transition: all 0.15s ease-in-out; }
-        .btn-status-ok.active { background-color: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
-        .btn-status-fail.active { background-color: #ef4444 !important; color: #ffffff !important; border-color: #dc2626 !important; }
-        .btn-status-na.active { background-color: #64748b !important; color: #ffffff !important; border-color: #475569 !important; }
-        #signature-pad { touch-action: none; background-color: #ffffff; }
-
-        .pdf-page { width: 100%; max-width: 800px; margin: 0 auto; background: #ffffff; color: #000000; padding: 10px; font-size: 10px; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-        .pdf-table-border { width: 100%; border-collapse: collapse; }
-        .pdf-table-border th, .pdf-table-border td { border: 1px solid #000000; padding: 3px 5px; font-size: 9px; }
-    </style>
+  <style>
+    @media print {
+      body > *:not(#formatoImpresionOficial) { display: none !important; }
+      #formatoImpresionOficial { display: block !important; font-family: Arial, sans-serif; color: #000; width: 100%; }
+      .tbl-imp { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 6px; }
+      .tbl-imp th, .tbl-imp td { border: 1px solid #000; padding: 3px 4px; text-align: left; }
+      .tbl-imp th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+    }
+    #formatoImpresionOficial { display: none; }
+  </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-    <!-- CABECERA -->
-    <header class="no-print bg-[#0b1329] border-b border-slate-800 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div id="company-logo-container" class="flex items-center">
-                    <div id="default-logo-badge" class="bg-amber-500 text-slate-950 font-black px-3 py-1 rounded text-xl tracking-wider">
-                        TICSA
-                    </div>
-                    <img id="custom-logo-img" src="" class="hidden h-10 max-w-[140px] object-contain rounded bg-white p-1">
-                </div>
-                <div>
-                    <h1 class="text-sm font-bold text-white leading-tight">Sistema de Inspecciones Cloud</h1>
-                    <p class="text-xs text-slate-400">Sincronizado Celular / PC (SGS-PTICSA-050-F01)</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <label class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition">
-                    <i data-lucide="upload" class="w-3.5 h-3.5 text-amber-400"></i>
-                    <span class="hidden sm:inline">Subir Logo</span>
-                    <input type="file" accept="image/*" class="hidden" onchange="uploadCustomLogo(event)">
-                </label>
-                <button onclick="switchTab('form')" id="tab-form-btn" class="flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span>Nueva Inspección</span>
-                </button>
-                <button onclick="switchTab('history')" id="tab-history-btn" class="flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition">
-                    <i data-lucide="folder" class="w-4 h-4"></i>
-                    <span>Historial Cloud</span>
-                    <span id="history-counter-badge" class="bg-amber-500 text-slate-950 px-1.5 py-0.2 text-xs rounded-full font-bold">0</span>
-                </button>
-            </div>
+  <!-- BARRA SUPERIOR ORIGINAL -->
+  <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-400 text-slate-900 font-black text-xl px-3 py-1 rounded shadow">TICSA</div>
+        <div>
+          <h1 class="font-bold text-base leading-tight">Sistema de Inspecciones Cloud</h1>
+          <p class="text-xs text-slate-400">Sincronizado Celular / PC (SGS-PTICSA-050-F01)</p>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-
-        <!-- FORMULARIO -->
-        <div id="view-form" class="no-print space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                <div>
-                    <span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20 mb-1">APP MÓVIL SINCRONIZADA</span>
-                    <h2 class="text-lg font-bold text-slate-900">Inspección de 17 Puntos, Sello y Seguridad Agrícola</h2>
-                </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button type="button" onclick="resetForm()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg border border-slate-300 transition">
-                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Limpiar
-                    </button>
-                    <button type="button" onclick="saveInspection(false)" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition shadow">
-                        <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> Guardar en Nube
-                    </button>
-                    <button type="button" onclick="saveAndPrint()" class="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-lg transition shadow">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Guardar e Imprimir PDF
-                    </button>
-                </div>
-            </div>
-
-            <!-- DATOS GENERALES -->
-            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
-                <div class="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-100 pb-2">
-                    <i data-lucide="truck" class="w-5 h-5 text-amber-500"></i>
-                    <h3>Datos Generales de la Unidad</h3>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NO. TRACTO *</label>
-                        <input type="text" id="no_tracto" placeholder="Ej. 11" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">PLACAS TRACTO *</label>
-                        <input type="text" id="placas_tracto" placeholder="Ej. 38452" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 uppercase focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">NO. CAJA</label>
-                        <input type="text" id="no_caja" placeholder="Ej. 000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">PLACAS CAJA</label>
-                        <input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 uppercase focus:outline-none focus:border-amber-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">OPERADOR *</label>
-                        <input type="text" id="operador" placeholder="Ej. MARCOS" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">FECHA *</label>
-                        <input type="date" id="fecha" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">HORA *</label>
-                        <input type="time" id="hora" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">SELLO NÚMERO</label>
-                        <input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label>
-                        <input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-            </div>
-
-            <!-- EVIDENCIA FOTOGRÁFICA -->
-            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <div class="flex items-center gap-2 text-slate-900 font-bold">
-                        <i data-lucide="camera" class="w-5 h-5 text-amber-500"></i>
-                        <h3>Evidencia Fotográfica de las Unidades</h3>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <label class="w-full sm:w-auto flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2.5 rounded-lg cursor-pointer transition text-sm">
-                        <i data-lucide="image-plus" class="w-4 h-4"></i>
-                        <span>Tomar Foto / Adjuntar Imágenes</span>
-                        <input type="file" id="photo-input" accept="image/*" multiple capture="environment" class="hidden" onchange="handlePhotoUpload(event)">
-                    </label>
-                </div>
-
-                <div id="photo-preview-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                    <!-- Dinámico -->
-                </div>
-            </div>
-
-            <!-- 17 PUNTOS -->
-            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
-                    <div class="flex items-center gap-2 text-slate-900 font-bold">
-                        <i data-lucide="list-checks" class="w-5 h-5 text-amber-500"></i>
-                        <h3>Tabla de 17 Puntos de Inspección</h3>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="markAll17('ok')" class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded hover:bg-emerald-100 transition">
-                            Marcar Todo ✓
-                        </button>
-                        <button type="button" onclick="markBoxNA()" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 rounded hover:bg-slate-200 transition">
-                            Caja a N/A (11 a 16)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="space-y-2.5" id="inspection-points-container">
-                    <!-- Dinámico -->
-                </div>
-            </div>
-
-            <!-- SEGURIDAD AGRÍCOLA -->
-            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
-                    <div class="flex items-center gap-2 text-slate-900 font-bold">
-                        <i data-lucide="sprout" class="w-5 h-5 text-amber-500"></i>
-                        <h3>Inspección de Seguridad Agrícola</h3>
-                    </div>
-                    <button type="button" onclick="markAllAgri('clean')" class="px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded hover:bg-emerald-100 transition">
-                        Marcar Todo Limpio ✓
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="agri-points-container">
-                    <!-- Dinámico -->
-                </div>
-
-                <div class="pt-2">
-                    <label class="block text-xs font-bold text-slate-600 mb-1">BASURA EN CABINA GENERADA POR EL OPERADOR (ESPECIFIQUE):</label>
-                    <input type="text" id="agri_basura" placeholder="Ej. Sin novedad" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500">
-                </div>
-            </div>
-
-            <!-- OBSERVACIONES Y FIRMA -->
-            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">OBSERVACIONES ADICIONALES</label>
-                        <textarea id="observaciones" rows="5" placeholder="Escriba observaciones adicionales..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-amber-500"></textarea>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block text-xs font-bold text-slate-700">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
-                            <button type="button" onclick="clearSignature()" class="text-xs text-slate-500 hover:text-rose-600 transition flex items-center gap-1">
-                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i> Limpiar Firma
-                            </button>
-                        </div>
-                        <div class="border-2 border-dashed border-slate-300 rounded-lg p-1 bg-white">
-                            <canvas id="signature-pad" class="w-full h-32 rounded cursor-crosshair"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BOTONERA -->
-            <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
-                <button type="button" onclick="resetForm()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-sm transition">
-                    Reiniciar Formulario
-                </button>
-                <button type="button" onclick="saveInspection(false)" class="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm transition shadow flex items-center justify-center gap-1.5">
-                    <i data-lucide="cloud-upload" class="w-4 h-4"></i> Guardar en Nube
-                </button>
-                <button type="button" onclick="saveAndPrint()" class="w-full sm:w-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-sm transition shadow flex items-center justify-center gap-2">
-                    <i data-lucide="printer" class="w-4 h-4"></i> Guardar e Imprimir PDF
-                </button>
-            </div>
-
-        </div>
-
-        <!-- VISTA DE HISTORIAL -->
-        <div id="view-history" class="no-print hidden space-y-6">
-            <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900">Historial Sincronizado (Celular / PC)</h2>
-                    <p class="text-xs text-slate-500">Proyectado en vivo desde Firebase Firestore.</p>
-                </div>
-                <div class="relative w-full sm:w-64">
-                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
-                    <input type="text" id="search-history" onkeyup="renderHistory()" placeholder="Buscar por Tracto, Operador..." class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500">
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-700">
-                    <thead class="bg-[#0b1329] text-white uppercase font-semibold">
-                        <tr>
-                            <th class="p-3">FECHA / HORA</th>
-                            <th class="p-3">TRACTO / CAJA</th>
-                            <th class="p-3">OPERADOR</th>
-                            <th class="p-3">FOTOS</th>
-                            <th class="p-3">17 PUNTOS</th>
-                            <th class="p-3">SEG. AGRÍCOLA</th>
-                            <th class="p-3 text-right">ACCIONES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body" class="divide-y divide-slate-200">
-                        <!-- Dinámico -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- FORMATO DE IMPRESIÓN OFICIAL (PRINT-ONLY) -->
-   <!-- ======================================================= -->
-<!-- FORMATO EXACTO DE IMPRESIÓN OFICIAL SGS-PTICSA-050-F01  -->
-<!-- ======================================================= -->
-<style>
-@media print {
-  body > *:not(#formatoImpresionOficial) {
-    display: none !important;
-  }
-
-  #formatoImpresionOficial {
-    display: block !important;
-    font-family: Arial, sans-serif;
-    color: #000;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    font-size: 10px;
-  }
-
-  .header-tic {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 2px solid #000;
-    padding-bottom: 4px;
-    margin-bottom: 6px;
-  }
-
-  .tbl-data, .tbl-puntos17, .tbl-agricola {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 6px;
-    font-size: 10px;
-  }
-
-  .tbl-data td, .tbl-puntos17 th, .tbl-puntos17 td, .tbl-agricola th, .tbl-agricola td {
-    border: 1px solid #000;
-    padding: 3px 4px;
-  }
-
-  .tbl-puntos17 th, .tbl-agricola th {
-    background-color: #f0f0f0 !important;
-    -webkit-print-color-adjust: exact;
-    font-weight: bold;
-    text-align: left;
-  }
-
-  .diagrama-unidad {
-    border: 1px solid #000;
-    padding: 6px;
-    margin-bottom: 6px;
-    text-align: center;
-    font-size: 9px;
-    background: #fafafa;
-  }
-}
-
-#formatoImpresionOficial {
-  display: none;
-}
-</style>
-
-<div id="formatoImpresionOficial">
-  <!-- Encabezado Oficial -->
-  <div class="header-tic">
-    <div>
-      <div style="font-weight: 900; font-size: 20px; background: #FFB800; padding: 2px 8px; border-radius: 4px; display: inline-block;">TICSA</div>
-      <div style="font-weight: bold; font-size: 13px; margin-top: 3px;">
-        Inspección 17 puntos, sello y seguridad agrícola
+      </div>
+      <div class="flex gap-2">
+        <button onclick="resetForm()" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded font-medium">Limpiar</button>
+        <button onclick="saveInspection(true)" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold">Guardar en Nube</button>
+        <button onclick="saveAndPrint()" class="px-3 py-1.5 text-xs bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">Guardar e Imprimir PDF</button>
       </div>
     </div>
-    <div style="text-align: right; font-size: 9px;">
-      <strong>SGS-PTICSA-050-F01</strong><br>Rev.01
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 space-y-6">
+
+    <!-- DATOS GENERALES -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <h2 class="font-bold text-slate-700 text-sm flex items-center gap-2">📋 Datos Generales de la Unidad</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. TRACTO *</label><input type="text" id="no_tracto" placeholder="Ej. 11" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS TRACTO *</label><input type="text" id="placas_tracto" placeholder="Ej. 38452" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. CAJA</label><input type="text" id="no_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS CAJA</label><input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">OPERADOR *</label><input type="text" id="operador" placeholder="Ej. MARCOS" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">FECHA *</label><input type="date" id="fecha" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">HORA *</label><input type="time" id="hora" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+        <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+      </div>
+      <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+    </section>
+
+    <!-- 17 PUNTOS DE INSPECCIÓN -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <div class="flex justify-between items-center">
+        <h2 class="font-bold text-slate-700 text-sm">📋 Tabla de 17 Puntos de Inspección</h2>
+      </div>
+      <div id="points-container" class="space-y-2"></div>
+    </section>
+
+    <!-- SEGURIDAD AGRÍCOLA -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <h2 class="font-bold text-slate-700 text-sm">🌾 Inspección de Seguridad Agrícola</h2>
+      <div id="agri-points-container" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+      <div class="pt-3">
+        <label class="block text-xs font-bold text-slate-500 mb-1">BASURA EN CABINA GENERADA POR EL OPERADOR (ESPECIFIQUE):</label>
+        <input type="text" id="agri_basura" placeholder="Ej. Sin novedad" class="w-full border rounded p-2 text-sm bg-slate-50">
+      </div>
+    </section>
+
+    <!-- OBSERVACIONES Y FIRMA -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">OBSERVACIONES ADICIONALES:</label>
+        <textarea id="observaciones" rows="2" placeholder="Escriba observaciones adicionales..." class="w-full border rounded p-2 text-sm bg-slate-50"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
+        <canvas id="signaturePad" width="350" height="120" class="border border-slate-300 rounded bg-slate-50 cursor-crosshair touch-none"></canvas>
+        <button onclick="clearSignature()" class="text-xs text-slate-500 underline mt-1 block">Limpiar Firma</button>
+      </div>
+    </section>
+
+    <div class="flex justify-end gap-3 pb-10">
+      <button onclick="saveInspection(true)" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-lg shadow">Guardar en Nube</button>
+      <button onclick="saveAndPrint()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm rounded-lg shadow">Guardar e Imprimir PDF</button>
     </div>
-  </div>
 
-  <!-- Rejilla de Datos de Unidad -->
-  <table class="tbl-data">
-    <tr>
-      <td><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
-      <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
-      <td><strong>Hora:</strong> <span id="f_hora"></span></td>
-    </tr>
-    <tr>
-      <td><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
-      <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
-      <td><strong>Fecha:</strong> <span id="f_fecha"></span></td>
-    </tr>
-    <tr>
-      <td colspan="2"><strong>Operador:</strong> <span id="f_operador"></span></td>
-      <td><strong>Sello número:</strong> <span id="f_sello"></span></td>
-    </tr>
-  </table>
+  </main>
 
-  <div style="font-size: 8px; font-style: italic; margin-bottom: 6px;">
-    La inspección debe completarse y documentarse en todos los contenedores y tractos.
-  </div>
+  <!-- PLANTILLA DE IMPRESIÓN FORMATO OFICIAL -->
+  <div id="formatoImpresionOficial">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:4px; margin-bottom:6px;">
+      <div style="font-weight:900; font-size:18px; background:#FFB800; padding:2px 8px;">TICSA</div>
+      <div style="font-weight:bold; font-size:12px; text-align:center;">Inspección 17 puntos, sello y seguridad agrícola</div>
+      <div style="font-size:8px; text-align:right;"><strong>SGS-PTICSA-050-F01</strong><br>Rev.01</div>
+    </div>
 
-  <!-- Esquema Simplificado 17 Puntos -->
-  <div class="diagrama-unidad">
-    <strong>1.- Defensa | 2.- Motor | 3.- Llantas | 4.- Piso (camión) | 5.- Tanque combustible | 6.- Cabina | 7.- Tanque aire | 8.- Ejes acción | 9.- Llanta repuesto | 10.- Exteriores/tren rodaje | 11.- Puertas | 12.- Piso (caja) | 13.- Paredes laterales | 14.- Pared frontal | 15.- Techo | 16.- Refrigeración | 17.- Escape</strong>
-  </div>
-
-  <!-- Tabla 17 Puntos Oficial (2 Columnas) -->
-  <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">17 Puntos de inspección</div>
-  <table class="tbl-puntos17">
-    <thead>
+    <table class="tbl-imp">
       <tr>
-        <th style="width: 20px;">#</th>
-        <th>Punto</th>
-        <th style="width: 30px; text-align: center;">Estatus</th>
-        <th style="width: 20px;">#</th>
-        <th>Punto</th>
-        <th style="width: 30px; text-align: center;">Estatus</th>
+        <td><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
+        <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
+        <td><strong>Hora:</strong> <span id="f_hora"></span></td>
       </tr>
-    </thead>
-    <tbody id="f_bodyPuntos">
-      <!-- Se autocompleta con los datos capturados -->
-    </tbody>
-  </table>
+      <tr>
+        <td><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
+        <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
+        <td><strong>Fecha:</strong> <span id="f_fecha"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Operador:</strong> <span id="f_operador"></span></td>
+        <td><strong>Sello número:</strong> <span id="f_sello"></span></td>
+      </tr>
+    </table>
 
-  <div style="font-size: 8px; margin-bottom: 6px;">
-    Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones.
+    <div style="font-size:8px; font-style:italic; margin-bottom:4px;">La inspección debe completarse y documentarse en todos los contenedores y tractos.</div>
+
+    <div style="font-weight:bold; font-size:9px; margin-bottom:2px;">17 Puntos de inspección</div>
+    <table class="tbl-imp">
+      <thead>
+        <tr>
+          <th style="width:15px;">#</th><th>Punto</th><th style="width:25px; text-align:center;">Estatus</th>
+          <th style="width:15px;">#</th><th>Punto</th><th style="width:25px; text-align:center;">Estatus</th>
+        </tr>
+      </thead>
+      <tbody id="f_bodyPuntos"></tbody>
+    </table>
+
+    <div style="font-size:8px; margin-bottom:4px;">Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad.</div>
+
+    <div style="font-weight:bold; font-size:9px; margin-bottom:2px;">Seguridad agrícola</div>
+    <table class="tbl-imp">
+      <tbody id="f_bodyAgricola"></tbody>
+    </table>
+
+    <table class="tbl-imp" style="margin-top:4px;">
+      <tr>
+        <td>
+          <strong>Basura en cabina generada por el operador:</strong> <span id="f_basura"></span><br>
+          <strong>Observaciones adicionales:</strong> <span id="f_obs"></span>
+        </td>
+      </tr>
+    </table>
+
+    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <strong>firma del oficial de seguridad:</strong><br>
+        <img id="f_imgFirma" style="max-height:35px; border-bottom:1px solid #000; margin-top:2px;"><br>
+        <strong>Nombre:</strong> <span id="f_inspector"></span>
+      </div>
+      <div style="font-size:8px; font-weight:bold;">SGS-PTICSA-050-F01 Rev.01</div>
+    </div>
   </div>
 
-  <!-- Tabla Seguridad Agrícola Oficial -->
-  <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">Seguridad agrícola</div>
-  <table class="tbl-agricola">
-    <tbody id="f_bodyAgricola">
-      <!-- Se autocompleta con los datos capturados -->
-    </tbody>
-  </table>
+  <!-- LÓGICA DE DIBUJO DE PUNTOS Y FIREBASE -->
+  <script>
+    const POINTS = ["Defensa", "Motor", "Llantas", "Piso (del camión)", "Tanque de combustible", "Cabina", "Tanque de aire", "Ejes de acción", "Llanta de repuesto", "Exteriores/ tren de rodaje", "Puertas por dentro/fuera", "Piso (de la caja)", "Paredes laterales", "Pared frontal", "Techo", "Unidad de refrigeración", "Escape"];
+    const AGRI_ITEMS = ["Insectos vivos o muertos", "Moho", "Hojas, ramitas, corteza", "Huevecillos", "Carne", "Sangre", "Huesos", "Pelo", "Secreciones", "Excreciones", "Frutas", "Semillas", "Hongos", "Lodo", "Animal vivo o muerto: liebre, serpiente"];
 
-  <!-- Campo Basura e Inspectores -->
-  <table class="tbl-data" style="margin-top: 4px;">
-    <tr>
-      <td>
-        <strong>Basura en cabina generada por el operador (especifique):</strong> <span id="f_basura"></span>
-      </td>
-    </tr>
-  </table>
+    let pointStates = {}, agriStates = {};
 
-  <!-- Pie con Firma Oficial -->
-  <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-    <div>
-      <strong>firma del oficial de seguridad:</strong><br>
-      <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-top: 3px;"><br>
-      <strong>Nombre:</strong> <span id="f_inspector"></span>
-    </div>
-    <div style="font-size: 9px; font-weight: bold;">
-      SGS-PTICSA-050-F01 Rev.01
-    </div>
-  </div>
-</div>
-
-                <div style="text-align: center; width: 220px;">
-                    <div style="height: 35px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
-                        <img id="print-signature-img" src="" style="max-height: 35px; max-width: 100%; display: none;">
-                    </div>
-                    <div style="border-top: 1px solid #000; font-size: 8px; font-weight: bold; pt: 2px;">
-                        FIRMA DEL OFICIAL DE SEGURIDAD
-                    </div>
-                </div>
+    function initForm() {
+      const pCont = document.getElementById('points-container');
+      pCont.innerHTML = '';
+      POINTS.forEach((p, idx) => {
+        pointStates[idx] = 'ok';
+        pCont.innerHTML += `
+          <div class="flex items-center justify-between p-2 border rounded bg-slate-50 text-xs">
+            <span class="font-medium">${idx+1}. ${p}</span>
+            <div class="flex gap-1">
+              <button type="button" onclick="setPointStatus(${idx}, 'ok')" id="p_ok_${idx}" class="px-2 py-1 rounded bg-emerald-600 text-white font-bold">✓</button>
+              <button type="button" onclick="setPointStatus(${idx}, 'fail')" id="p_fail_${idx}" class="px-2 py-1 rounded bg-slate-200">X</button>
+              <button type="button" onclick="setPointStatus(${idx}, 'na')" id="p_na_${idx}" class="px-2 py-1 rounded bg-slate-200">N/A</button>
             </div>
+          </div>`;
+      });
 
-            <div id="print-photos-container" style="page-break-before: always; margin-top: 15px; display: none;">
-                <div style="font-weight: bold; font-size: 10px; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px;">
-                    EVIDENCIA FOTOGRÁFICA ADJUNTA AL FOLIO
-                </div>
-                <div id="print-photos-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                    <!-- Imágenes -->
-                </div>
+      const aCont = document.getElementById('agri-points-container');
+      aCont.innerHTML = '';
+      AGRI_ITEMS.forEach((a, idx) => {
+        agriStates[idx] = 'ok';
+        aCont.innerHTML += `
+          <div class="flex items-center justify-between p-2 border rounded bg-slate-50 text-xs">
+            <span>${a}</span>
+            <div class="flex gap-1">
+              <button type="button" onclick="setAgriStatus(${idx}, 'ok')" id="a_ok_${idx}" class="px-2 py-1 rounded bg-emerald-600 text-white font-bold">✓</button>
+              <button type="button" onclick="setAgriStatus(${idx}, 'fail')" id="a_fail_${idx}" class="px-2 py-1 rounded bg-slate-200">X</button>
             </div>
+          </div>`;
+      });
 
-        </div>
-    </div>
+      // Fecha y hora por defecto
+      const now = new Date();
+      document.getElementById('fecha').value = now.toISOString().substring(0, 10);
+      document.getElementById('hora').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }
 
-    <!-- LOGICA JS -->
-    <script>
-        const POINTS_17 = [
-            "Defensa", "Motor", "Llantas", "Piso (del camión)", "Tanque de combustible",
-            "Cabina", "Tanque de aire", "Ejes de acción", "Llanta de repuesto",
-            "Exteriores/ tren de rodaje", "Puertas por dentro/fuera", "Piso (de la caja)",
-            "Paredes laterales", "Pared frontal", "Techo", "Unidad de refrigeración", "Escape"
-        ];
+    function setPointStatus(idx, st) {
+      pointStates[idx] = st;
+      document.getElementById(`p_ok_${idx}`).className = `px-2 py-1 rounded ${st==='ok'?'bg-emerald-600 text-white font-bold':'bg-slate-200'}`;
+      document.getElementById(`p_fail_${idx}`).className = `px-2 py-1 rounded ${st==='fail'?'bg-rose-600 text-white font-bold':'bg-slate-200'}`;
+      document.getElementById(`p_na_${idx}`).className = `px-2 py-1 rounded ${st==='na'?'bg-slate-600 text-white font-bold':'bg-slate-200'}`;
+    }
 
-        const AGRI_POINTS = [
-            "Insectos vivos o muertos", "Moho", "Hojas, ramitas, corteza", "Huevecillos",
-            "Carne", "Sangre", "Huesos", "Pelo", "Secreciones", "Excreciones",
-            "Frutas", "Semillas", "Hongos", "Lodo", "Animal vivo o muerto: liebre, serpiente"
-        ];
+    function setAgriStatus(idx, st) {
+      agriStates[idx] = st;
+      document.getElementById(`a_ok_${idx}`).className = `px-2 py-1 rounded ${st==='ok'?'bg-emerald-600 text-white font-bold':'bg-slate-200'}`;
+      document.getElementById(`a_fail_${idx}`).className = `px-2 py-1 rounded ${st==='fail'?'bg-rose-600 text-white font-bold':'bg-slate-200'}`;
+    }
 
-        let currentPhotos = [];
-        let pointsState = {};
-        let agriState = {};
-        let signaturePadCanvas, signatureCtx;
-        let isSigning = false;
-        window.globalRecords = window.globalRecords || [];
+    // Canvas Firma
+    const canvas = document.getElementById('signaturePad');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mousemove', (e) => {
+      if(!drawing) return;
+      const r = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+      ctx.stroke();
+    });
+    function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath(); }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            initDateAndHours();
-            initPointsTables();
-            initSignaturePad();
-            loadSavedLogo();
-            loadRecords();
-        });
+    function saveAndPrint() {
+      // Sincronización a plantilla de impresión
+      document.getElementById('f_tracto').innerText = document.getElementById('no_tracto').value;
+      document.getElementById('f_placasTracto').innerText = document.getElementById('placas_tracto').value;
+      document.getElementById('f_caja').innerText = document.getElementById('no_caja').value;
+      document.getElementById('f_placasCaja').innerText = document.getElementById('placas_caja').value;
+      document.getElementById('f_operador').innerText = document.getElementById('operador').value;
+      document.getElementById('f_fecha').innerText = document.getElementById('fecha').value;
+      document.getElementById('f_hora').innerText = document.getElementById('hora').value;
+      document.getElementById('f_sello').innerText = document.getElementById('sello_numero').value;
+      document.getElementById('f_inspector').innerText = document.getElementById('oficial_nombre').value;
+      document.getElementById('f_basura').innerText = document.getElementById('agri_basura').value || 'Sin novedad';
+      document.getElementById('f_obs').innerText = document.getElementById('observaciones').value;
+      document.getElementById('f_imgFirma').src = canvas.toDataURL();
 
-        function uploadCustomLogo(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const src = evt.target.result;
-                    try { localStorage.setItem('ticsa_custom_logo', src); } catch(err){}
-                    applyLogo(src);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
+      // Rellenar 17 Puntos Impresión
+      const pBody = document.getElementById('f_bodyPuntos');
+      pBody.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        pBody.innerHTML += `
+          <tr>
+            <td>${i+1}</td><td>${POINTS[i]}</td><td style="text-align:center;"><strong>${pointStates[i]==='ok'?'✓':pointStates[i]==='fail'?'X':'N/A'}</strong></td>
+            <td>${POINTS[i+9]?i+10:''}</td><td>${POINTS[i+9]||''}</td><td style="text-align:center;"><strong>${pointStates[i+9]?(pointStates[i+9]==='ok'?'✓':pointStates[i+9]==='fail'?'X':'N/A'):''}</strong></td>
+          </tr>`;
+      }
 
-        function loadSavedLogo() {
-            try {
-                const savedLogo = localStorage.getItem('ticsa_custom_logo');
-                if (savedLogo) applyLogo(savedLogo);
-            } catch(e){}
-        }
+      // Rellenar Seguridad Agrícola Impresión
+      const aBody = document.getElementById('f_bodyAgricola');
+      aBody.innerHTML = '';
+      for (let i = 0; i < AGRI_ITEMS.length; i += 3) {
+        aBody.innerHTML += `
+          <tr>
+            <td>${AGRI_ITEMS[i]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i]==='ok'?'✓':'X'}</strong></td>
+            <td>${AGRI_ITEMS[i+1]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i+1]?(agriStates[i+1]==='ok'?'✓':'X'):''}</strong></td>
+            <td>${AGRI_ITEMS[i+2]||''}</td><td style="text-align:center; width:20px;"><strong>${agriStates[i+2]?(agriStates[i+2]==='ok'?'✓':'X'):''}</strong></td>
+          </tr>`;
+      }
 
-        function applyLogo(src) {
-            document.getElementById('default-logo-badge').classList.add('hidden');
-            const customImg = document.getElementById('custom-logo-img');
-            customImg.src = src;
-            customImg.classList.remove('hidden');
-
-            document.getElementById('print-default-badge').style.display = 'none';
-            const printImg = document.getElementById('print-custom-logo');
-            printImg.src = src;
-            printImg.style.display = 'block';
-        }
-
-        function initDateAndHours() {
-            const now = new Date();
-            document.getElementById('fecha').value = now.toISOString().split('T')[0];
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('hora').value = `${hours}:${minutes}`;
-        }
-
-        function initPointsTables() {
-            const container17 = document.getElementById('inspection-points-container');
-            container17.innerHTML = '';
-            POINTS_17.forEach((point, idx) => {
-                const pointNum = idx + 1;
-                pointsState[pointNum] = { status: 'ok', detail: '' };
-
-                const row = document.createElement('div');
-                row.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 gap-2";
-                row.innerHTML = `
-                    <div class="flex items-center gap-2 min-w-[180px]">
-                        <span class="w-5 h-5 rounded-full bg-slate-800 text-amber-400 font-bold flex items-center justify-center text-[11px]">${pointNum}</span>
-                        <span class="text-xs font-semibold text-slate-800">${point}</span>
-                    </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <div class="inline-flex rounded border border-slate-300 bg-white p-0.5 shadow-sm">
-                            <button type="button" onclick="setPointStatus(${pointNum}, 'ok')" id="btn-17-${pointNum}-ok" class="btn-status btn-status-ok active px-2 py-0.5 text-xs font-bold rounded">✓</button>
-                            <button type="button" onclick="setPointStatus(${pointNum}, 'fail')" id="btn-17-${pointNum}-fail" class="btn-status btn-status-fail px-2 py-0.5 text-xs font-bold rounded text-slate-400">X</button>
-                            <button type="button" onclick="setPointStatus(${pointNum}, 'na')" id="btn-17-${pointNum}-na" class="btn-status btn-status-na px-2 py-0.5 text-xs font-bold rounded text-slate-400">N/A</button>
-                        </div>
-                        <input type="text" id="detail-17-${pointNum}" onchange="setPointDetail(${pointNum}, this.value)" placeholder="Detalle si aplica..." class="flex-1 sm:w-48 bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-amber-500">
-                    </div>
-                `;
-                container17.appendChild(row);
-            });
-
-            const containerAgri = document.getElementById('agri-points-container');
-            containerAgri.innerHTML = '';
-            AGRI_POINTS.forEach((item, idx) => {
-                agriState[idx] = 'clean';
-
-                const card = document.createElement('div');
-                card.className = "flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200";
-                card.innerHTML = `
-                    <span class="text-xs text-slate-700 font-medium pr-2">${item}</span>
-                    <div class="inline-flex rounded border border-slate-300 bg-white p-0.5 shadow-sm">
-                        <button type="button" onclick="setAgriStatus(${idx}, 'clean')" id="btn-agri-${idx}-clean" class="btn-status btn-status-ok active px-2 py-0.5 text-xs font-bold rounded">✓</button>
-                        <button type="button" onclick="setAgriStatus(${idx}, 'detected')" id="btn-agri-${idx}-detected" class="btn-status btn-status-fail px-2 py-0.5 text-xs font-bold rounded text-slate-400">X</button>
-                    </div>
-                `;
-                containerAgri.appendChild(card);
-            });
-        }
-
-        function setPointStatus(num, status) {
-            pointsState[num].status = status;
-            ['ok', 'fail', 'na'].forEach(s => {
-                const btn = document.getElementById(`btn-17-${num}-${s}`);
-                if (s === status) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        }
-
-        function setPointDetail(num, text) {
-            pointsState[num].detail = text;
-        }
-
-        function setAgriStatus(idx, status) {
-            agriState[idx] = status;
-            ['clean', 'detected'].forEach(s => {
-                const btn = document.getElementById(`btn-agri-${idx}-${s}`);
-                if (s === status) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        }
-
-        function markAll17(status) {
-            for (let i = 1; i <= 17; i++) setPointStatus(i, status);
-        }
-
-        function markBoxNA() {
-            for (let i = 11; i <= 16; i++) setPointStatus(i, 'na');
-        }
-
-        function markAllAgri(status) {
-            AGRI_POINTS.forEach((_, idx) => setAgriStatus(idx, status));
-        }
-
-        function initSignaturePad() {
-            signaturePadCanvas = document.getElementById('signature-pad');
-            signatureCtx = signaturePadCanvas.getContext('2d');
-            signaturePadCanvas.width = signaturePadCanvas.offsetWidth;
-            signaturePadCanvas.height = signaturePadCanvas.offsetHeight;
-
-            signatureCtx.strokeStyle = "#000000";
-            signatureCtx.lineWidth = 2;
-            signatureCtx.lineCap = "round";
-
-            function getPos(e) {
-                const rect = signaturePadCanvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - rect.left, y: clientY - rect.top };
-            }
-
-            function startDraw(e) {
-                isSigning = true;
-                const pos = getPos(e);
-                signatureCtx.beginPath();
-                signatureCtx.moveTo(pos.x, pos.y);
-            }
-
-            function draw(e) {
-                if (!isSigning) return;
-                e.preventDefault();
-                const pos = getPos(e);
-                signatureCtx.lineTo(pos.x, pos.y);
-                signatureCtx.stroke();
-            }
-
-            function stopDraw() { isSigning = false; }
-
-            signaturePadCanvas.addEventListener('mousedown', startDraw);
-            signaturePadCanvas.addEventListener('mousemove', draw);
-            window.addEventListener('mouseup', stopDraw);
-
-            signaturePadCanvas.addEventListener('touchstart', startDraw, { passive: false });
-            signaturePadCanvas.addEventListener('touchmove', draw, { passive: false });
-            window.addEventListener('touchend', stopDraw);
-        }
-
-        function clearSignature() {
-            if (signatureCtx) signatureCtx.clearRect(0, 0, signaturePadCanvas.width, signaturePadCanvas.height);
-        }
-
-        function handlePhotoUpload(event) {
-            const files = Array.from(event.target.files);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentPhotos.push(e.target.result);
-                    renderPhotoPreviews();
-                };
-                reader.readAsDataURL(file);
-            });
-            event.target.value = '';
-        }
-
-        function removePhoto(index) {
-            currentPhotos.splice(index, 1);
-            renderPhotoPreviews();
-        }
-
-        function renderPhotoPreviews() {
-            const grid = document.getElementById('photo-preview-grid');
-            grid.innerHTML = '';
-            currentPhotos.forEach((src, idx) => {
-                const div = document.createElement('div');
-                div.className = "relative group rounded-lg overflow-hidden border border-slate-300 bg-slate-100 aspect-video";
-                div.innerHTML = `
-                    <img src="${src}" class="w-full h-full object-cover">
-                    <button type="button" onclick="removePhoto(${idx})" class="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded-full shadow hover:bg-rose-500 transition">
-                        <i data-lucide="x" class="w-3 h-3"></i>
-                    </button>
-                `;
-                grid.appendChild(div);
-            });
-            lucide.createIcons();
-        }
-
-        function loadRecords() {
-            try {
-                const data = localStorage.getItem('ticsa_inspections');
-                if (data && (!window.globalRecords || window.globalRecords.length === 0)) {
-                    window.globalRecords = JSON.parse(data);
-                }
-            } catch (e) {}
-            renderHistory();
-        }
-
-        async function saveInspection(silent = false) {
-            const noTracto = document.getElementById('no_tracto').value.trim();
-            const placasTracto = document.getElementById('placas_tracto').value.trim();
-            const operador = document.getElementById('operador').value.trim();
-            const oficial = document.getElementById('oficial_nombre').value.trim();
-
-            if (!noTracto || !placasTracto || !operador || !oficial) {
-                alert('Por favor complete todos los campos obligatorios (*)');
-                return null;
-            }
-
-            const record = {
-                timestamp: Date.now(),
-                folio: Date.now().toString(),
-                no_tracto: noTracto,
-                placas_tracto: placasTracto,
-                no_caja: document.getElementById('no_caja').value.trim() || '00',
-                placas_caja: document.getElementById('placas_caja').value.trim() || '00',
-                operador: operador,
-                fecha: document.getElementById('fecha').value,
-                hora: document.getElementById('hora').value,
-                sello_numero: document.getElementById('sello_numero').value.trim() || '0000',
-                oficial_nombre: oficial,
-                basura_cabina: document.getElementById('agri_basura').value.trim() || 'Sin novedad',
-                observaciones: document.getElementById('observaciones').value.trim() || 'Sin observaciones adicionales',
-                pointsState: JSON.parse(JSON.stringify(pointsState)),
-                agriState: JSON.parse(JSON.stringify(agriState)),
-                photos: [...currentPhotos],
-                signature: signaturePadCanvas.toDataURL()
-            };
-
-            if (window.inspectionsRef) {
-                try {
-                    await window.addDoc(window.inspectionsRef, record);
-                } catch(e) { console.warn("Guardando solo localmente:", e); }
-            }
-
-            window.globalRecords.unshift(record);
-            try { localStorage.setItem('ticsa_inspections', JSON.stringify(window.globalRecords)); } catch(e){}
-
-            if (!silent) {
-                alert('¡Inspección guardada y sincronizada!');
-            }
-
-            renderHistory();
-            return record;
-        }
-
-        function saveAndPrint() {
-            saveInspection(true).then(record => {
-                if (record) {
-                    populatePrintLayout(record);
-                    setTimeout(() => window.print(), 200);
-                }
-            });
-       function saveAndPrint() {
-  saveInspection(true).then(record => {
-    if (record) {
-      populatePrintLayout(record);
       setTimeout(() => { window.print(); }, 300);
     }
-  });
-}
 
-function printRecord(id) {
-  const record = (window.globalRecords || []).find(item => (item.id === id || item.idTimestamp === id));
-  if (!record) return;
-
-  populatePrintLayout(record);
-  setTimeout(() => { window.print(); }, 300);
-}
-                sigImg.src = data.signature;
-                sigImg.style.display = 'block';
-            } else {
-                sigImg.style.display = 'none';
-            }
-
-            const table17 = document.getElementById('print-17-table-body');
-            table17.innerHTML = '';
-            POINTS_17.forEach((point, idx) => {
-                const num = idx + 1;
-                const state = data.pointsState[num] || { status: 'ok', detail: '' };
-         function populatePrintLayout(data) {
-  // Llenar datos de la unidad en el formato de impresión
-  if (document.getElementById('f_tracto')) document.getElementById('f_tracto').innerText = data.no_tracto || '';
-  if (document.getElementById('f_placasTracto')) document.getElementById('f_placasTracto').innerText = data.placas_tracto || '';
-  if (document.getElementById('f_caja')) document.getElementById('f_caja').innerText = data.no_caja || '';
-  if (document.getElementById('f_placasCaja')) document.getElementById('f_placasCaja').innerText = data.placas_caja || '';
-  if (document.getElementById('f_operador')) document.getElementById('f_operador').innerText = data.operador || '';
-  if (document.getElementById('f_fecha')) document.getElementById('f_fecha').innerText = data.fecha || '';
-  if (document.getElementById('f_hora')) document.getElementById('f_hora').innerText = data.hora || '';
-  if (document.getElementById('f_sello')) document.getElementById('f_sello').innerText = data.sello_numero || '';
-  if (document.getElementById('f_inspector')) document.getElementById('f_inspector').innerText = data.oficial_nombre || '';
-  if (document.getElementById('f_basura')) document.getElementById('f_basura').innerText = data.agri_basura || 'Sin novedad';
-
-  // Firma del Oficial
-  const imgFirma = document.getElementById('f_imgFirma');
-  if (imgFirma && data.signature) {
-    imgFirma.src = data.signature;
-    imgFirma.style.display = 'block';
-  }
-
-  // Renderizar 17 Puntos
-  const pBody17 = document.getElementById('f_bodyPuntos');
-  if (pBody17 && data.points) {
-    pBody17.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-      const p1 = data.points[i];
-      const p2 = data.points[i + 9];
-      pBody17.innerHTML += `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${p1 ? p1.name : ''}</td>
-          <td style="text-align:center;"><strong>${p1 ? (p1.status === 'ok' ? '✓' : p1.status === 'fail' ? 'X' : 'N/A') : ''}</strong></td>
-          <td>${p2 ? i + 10 : ''}</td>
-          <td>${p2 ? p2.name : ''}</td>
-          <td style="text-align:center;"><strong>${p2 ? (p2.status === 'ok' ? '✓' : p2.status === 'fail' ? 'X' : 'N/A') : ''}</strong></td>
-        </tr>`;
+    function resetForm() {
+      document.querySelectorAll('input, textarea').forEach(i => i.value = '');
+      clearSignature();
+      initForm();
     }
-  }
 
-  // Renderizar Seguridad Agrícola
-  const pBodyAg = document.getElementById('f_bodyAgricola');
-  if (pBodyAg && data.agri) {
-    pBodyAg.innerHTML = '';
-    const agriKeys = Object.keys(data.agri);
-    for (let i = 0; i < agriKeys.length; i += 3) {
-      const k1 = agriKeys[i], k2 = agriKeys[i+1], k3 = agriKeys[i+2];
-      pBodyAg.innerHTML += `
-        <tr>
-          <td>${k1 || ''}</td><td style="text-align:center; width:25px;"><strong>${k1 ? (data.agri[k1] === 'detected' ? 'X' : '✓') : ''}</strong></td>
-          <td>${k2 || ''}</td><td style="text-align:center; width:25px;"><strong>${k2 ? (data.agri[k2] === 'detected' ? 'X' : '✓') : ''}</strong></td>
-          <td>${k3 || ''}</td><td style="text-align:center; width:25px;"><strong>${k3 ? (data.agri[k3] === 'detected' ? 'X' : '✓') : ''}</strong></td>
-        </tr>`;
-    }
-  }
-}
-                data.photos.forEach(src => {
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.style.width = '100%';
-                    img.style.height = '140px';
-                    img.style.objectFit = 'cover';
-                    img.style.border = '1px solid #000';
-                    photoGrid.appendChild(img);
-                });
-            } else {
-                document.getElementById('print-photos-container').style.display = 'none';
-            }
-        }
-
-        function switchTab(tab) {
-            const formView = document.getElementById('view-form');
-            const historyView = document.getElementById('view-history');
-            const formBtn = document.getElementById('tab-form-btn');
-            const historyBtn = document.getElementById('tab-history-btn');
-
-            if (tab === 'form') {
-                formView.classList.remove('hidden');
-                historyView.classList.add('hidden');
-                formBtn.className = "flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition";
-                historyBtn.className = "flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition";
-            } else {
-                formView.classList.add('hidden');
-                historyView.classList.remove('hidden');
-                historyBtn.className = "flex items-center gap-2 bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs sm:text-sm transition";
-                formBtn.className = "flex items-center gap-2 bg-slate-800 text-slate-300 font-semibold px-3 py-2 rounded-lg text-xs sm:text-sm hover:bg-slate-700 transition";
-                renderHistory();
-            }
-        }
-
-        window.renderHistory = function() {
-            const tbody = document.getElementById('history-table-body');
-            const badge = document.getElementById('history-counter-badge');
-
-            if (badge) badge.innerText = window.globalRecords.length;
-
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (window.globalRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-500 font-medium">No hay inspecciones guardadas.</td></tr>`;
-                return;
-            }
-
-            window.globalRecords.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-3">
-                        <div class="font-bold text-slate-900">${item.fecha}</div>
-                        <div class="text-[10px] text-slate-500">${item.hora}</div>
-                    </td>
-                    <td class="p-3 font-bold text-slate-900">
-                        ${item.no_tracto} / ${item.no_caja}
-                    </td>
-                    <td class="p-3 font-medium text-slate-700">${item.operador}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-[10px] font-bold"><i data-lucide="image" class="w-3 h-3 inline"></i> ${item.photos ? item.photos.length : 0}</span></td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">OK</span></td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Limpio</span></td>
-                    <td class="p-3 text-right">
-                        <button onclick="printRecord('${item.id || item.timestamp}')" class="p-1.5 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/20 rounded transition" title="Imprimir PDF">
-                            <i data-lucide="printer" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="deleteRecord('${item.id || item.timestamp}')" class="p-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border border-rose-500/20 rounded transition ml-1" title="Eliminar">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            lucide.createIcons();
-        }
-
-        async function deleteRecord(id) {
-            if (confirm('¿Desea eliminar este registro?')) {
-                if (window.db && window.doc) {
-                    try {
-                        await window.deleteDoc(window.doc(window.db, "inspecciones_ticsa", id));
-                    } catch(e){}
-                }
-                window.globalRecords = window.globalRecords.filter(item => item.id !== id && item.timestamp !== id);
-                try { localStorage.setItem('ticsa_inspections', JSON.stringify(window.globalRecords)); } catch(e){}
-                renderHistory();
-            }
-        }
-
-        function resetForm() {
-            if (confirm('¿Desea reiniciar todo el formulario?')) {
-                document.getElementById('no_tracto').value = '';
-                document.getElementById('placas_tracto').value = '';
-                document.getElementById('no_caja').value = '';
-                document.getElementById('placas_caja').value = '';
-                document.getElementById('operador').value = '';
-                document.getElementById('sello_numero').value = '';
-                document.getElementById('oficial_nombre').value = '';
-                document.getElementById('agri_basura').value = '';
-                document.getElementById('observaciones').value = '';
-                currentPhotos = [];
-                renderPhotoPreviews();
-                clearSignature();
-                initDateAndHours();
-                markAll17('ok');
-                markAllAgri('clean');
-            }
-        }
-    </script>
+    window.onload = initForm;
+  </script>
 </body>
 </html>
