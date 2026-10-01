@@ -324,199 +324,160 @@
     </main>
 
     <!-- FORMATO DE IMPRESIÓN OFICIAL (PRINT-ONLY) -->
-    <div class="print-only">
-        <div id="pdf-printable-area" class="pdf-page">
-            
-            <table class="pdf-table-border" style="margin-bottom: 5px;">
-                <tr>
-                    <td style="width: 28%; text-align: center; vertical-align: middle;">
-                        <div id="print-logo-box">
-                            <div id="print-default-badge" style="font-size: 24px; font-weight: 900; letter-spacing: 1px;">TICSA</div>
-                            <img id="print-custom-logo" src="" style="display: none; max-height: 40px; margin: 0 auto;">
-                        </div>
-                    </td>
-                    <td style="width: 47%; text-align: center; vertical-align: middle;">
-                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">INSPECCIÓN 17 PUNTOS, SELLO Y SEGURIDAD AGRÍCOLA</div>
-                        <div style="font-size: 8px; font-style: italic; color: #444; margin-top: 2px;">
-                            La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
-                        </div>
-                    </td>
-                    <td style="width: 25%; font-size: 8px; vertical-align: middle; padding-left: 5px;">
-                        <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
-                        <div><strong>Rev.:</strong> 01</div>
-                        <div><strong>Folio:</strong> <span id="print-folio">1790619959095</span></div>
-                    </td>
-                </tr>
-            </table>
+   <!-- ======================================================= -->
+<!-- FORMATO EXACTO DE IMPRESIÓN OFICIAL SGS-PTICSA-050-F01  -->
+<!-- ======================================================= -->
+<style>
+@media print {
+  body > *:not(#formatoImpresionOficial) {
+    display: none !important;
+  }
 
-            <table class="pdf-table-border" style="margin-bottom: 5px;">
-                <tr>
-                    <td style="width: 35%;"><strong>No. Tracto:</strong> <span id="print-no-tracto">11</span></td>
-                    <td style="width: 35%;"><strong>No. Caja:</strong> <span id="print-no-caja">00</span></td>
-                    <td style="width: 30%;"><strong>Hora:</strong> <span id="print-hora">12:16</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Placas Tracto:</strong> <span id="print-placas-tracto">65694</span></td>
-                    <td><strong>Placas Caja:</strong> <span id="print-placas-caja">00</span></td>
-                    <td><strong>Fecha:</strong> <span id="print-fecha">2026-09-28</span></td>
-                </tr>
-                <tr>
-                    <td colspan="2"><strong>Operador:</strong> <span id="print-operador">marco</span></td>
-                    <td><strong>Sello número:</strong> <span id="print-sello">0000</span></td>
-                </tr>
-            </table>
+  #formatoImpresionOficial {
+    display: block !important;
+    font-family: Arial, sans-serif;
+    color: #000;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+  }
 
-            <table class="pdf-table-border" style="margin-bottom: 5px;">
-                <tr>
-                    <td style="width: 46%; vertical-align: top; text-align: center; padding: 4px;">
-                        <div style="font-size: 7.5px; font-weight: normal; margin-bottom: 4px; text-align: center;">
-                            La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
-                        </div>
-                        
-                        <div style="border: 1px solid #94a3b8; padding: 6px; background: #ffffff; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); border-radius: 2px;">
-                            <svg viewBox="0 0 520 180" style="width: 100%; height: auto; display: block;">
-                                <defs>
-                                    <marker id="red-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626" />
-                                    </marker>
-                                </defs>
-                                <path d="M 50 105 C 50 105 80 100 90 90 C 100 70 105 50 125 50 L 150 50 L 155 130 L 50 130 Z" fill="#f1f5f9" stroke="#334155" stroke-width="2" />
-                                <rect x="80" y="60" width="30" height="25" fill="#cbd5e1" rx="2" />
-                                <rect x="155" y="45" width="275" height="85" fill="#f8fafc" stroke="#334155" stroke-width="2" />
-                                <rect x="430" y="45" width="25" height="85" fill="#e2e8f0" stroke="#334155" stroke-width="1.5" />
+  .header-tic {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
 
-                                <circle cx="75" cy="130" r="13" fill="#1e293b" /><circle cx="75" cy="130" r="5" fill="#94a3b8" />
-                                <circle cx="170" cy="130" r="13" fill="#1e293b" /><circle cx="170" cy="130" r="5" fill="#94a3b8" />
-                                <circle cx="198" cy="130" r="13" fill="#1e293b" /><circle cx="198" cy="130" r="5" fill="#94a3b8" />
-                                <circle cx="325" cy="130" r="13" fill="#1e293b" /><circle cx="325" cy="130" r="5" fill="#94a3b8" />
-                                <circle cx="353" cy="130" r="13" fill="#1e293b" /><circle cx="353" cy="130" r="5" fill="#94a3b8" />
-                                <circle cx="381" cy="130" r="13" fill="#1e293b" /><circle cx="381" cy="130" r="5" fill="#94a3b8" />
+  .tbl-data, .tbl-puntos17, .tbl-agricola {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
 
-                                <line x1="45" y1="148" x2="45" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="45" cy="148" r="8" fill="#dc2626" /><text x="45" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">1</text>
+  .tbl-data td, .tbl-puntos17 th, .tbl-puntos17 td, .tbl-agricola th, .tbl-agricola td {
+    border: 1px solid #000;
+    padding: 3px 4px;
+  }
 
-                                <line x1="60" y1="32" x2="70" y2="55" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="60" cy="32" r="8" fill="#dc2626" /><text x="60" y="35" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">2</text>
+  .tbl-puntos17 th, .tbl-agricola th {
+    background-color: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    font-weight: bold;
+    text-align: left;
+  }
 
-                                <line x1="75" y1="160" x2="75" y2="143" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="75" cy="160" r="8" fill="#dc2626" /><text x="75" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">3</text>
+  .diagrama-unidad {
+    border: 1px solid #000;
+    padding: 6px;
+    margin-bottom: 6px;
+    text-align: center;
+    font-size: 9px;
+    background: #fafafa;
+  }
+}
 
-                                <line x1="105" y1="148" x2="105" y2="110" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="105" cy="148" r="8" fill="#dc2626" /><text x="105" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">4</text>
+#formatoImpresionOficial {
+  display: none;
+}
+</style>
 
-                                <line x1="125" y1="160" x2="125" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="125" cy="160" r="8" fill="#dc2626" /><text x="125" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">5</text>
+<div id="formatoImpresionOficial">
+  <!-- Encabezado Oficial -->
+  <div class="header-tic">
+    <div>
+      <div style="font-weight: 900; font-size: 20px; background: #FFB800; padding: 2px 8px; border-radius: 4px; display: inline-block;">TICSA</div>
+      <div style="font-weight: bold; font-size: 13px; margin-top: 3px;">
+        Inspección 17 puntos, sello y seguridad agrícola
+      </div>
+    </div>
+    <div style="text-align: right; font-size: 9px;">
+      <strong>SGS-PTICSA-050-F01</strong><br>Rev.01
+    </div>
+  </div>
 
-                                <line x1="135" y1="135" x2="135" y2="95" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="135" cy="135" r="8" fill="#dc2626" /><text x="135" y="138" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">6</text>
+  <!-- Rejilla de Datos de Unidad -->
+  <table class="tbl-data">
+    <tr>
+      <td><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
+      <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
+      <td><strong>Hora:</strong> <span id="f_hora"></span></td>
+    </tr>
+    <tr>
+      <td><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
+      <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
+      <td><strong>Fecha:</strong> <span id="f_fecha"></span></td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>Operador:</strong> <span id="f_operador"></span></td>
+      <td><strong>Sello número:</strong> <span id="f_sello"></span></td>
+    </tr>
+  </table>
 
-                                <line x1="150" y1="160" x2="150" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="150" cy="160" r="8" fill="#dc2626" /><text x="150" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">7</text>
+  <div style="font-size: 8px; font-style: italic; margin-bottom: 6px;">
+    La inspección debe completarse y documentarse en todos los contenedores y tractos.
+  </div>
 
-                                <line x1="170" y1="160" x2="170" y2="143" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="170" cy="160" r="8" fill="#dc2626" /><text x="170" y="163" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">8</text>
+  <!-- Esquema Simplificado 17 Puntos -->
+  <div class="diagrama-unidad">
+    <strong>1.- Defensa | 2.- Motor | 3.- Llantas | 4.- Piso (camión) | 5.- Tanque combustible | 6.- Cabina | 7.- Tanque aire | 8.- Ejes acción | 9.- Llanta repuesto | 10.- Exteriores/tren rodaje | 11.- Puertas | 12.- Piso (caja) | 13.- Paredes laterales | 14.- Pared frontal | 15.- Techo | 16.- Refrigeración | 17.- Escape</strong>
+  </div>
 
-                                <line x1="225" y1="148" x2="225" y2="125" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="225" cy="148" r="8" fill="#dc2626" /><text x="225" y="151" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">9</text>
+  <!-- Tabla 17 Puntos Oficial (2 Columnas) -->
+  <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">17 Puntos de inspección</div>
+  <table class="tbl-puntos17">
+    <thead>
+      <tr>
+        <th style="width: 20px;">#</th>
+        <th>Punto</th>
+        <th style="width: 30px; text-align: center;">Estatus</th>
+        <th style="width: 20px;">#</th>
+        <th>Punto</th>
+        <th style="width: 30px; text-align: center;">Estatus</th>
+      </tr>
+    </thead>
+    <tbody id="f_bodyPuntos">
+      <!-- Se autocompleta con los datos capturados -->
+    </tbody>
+  </table>
 
-                                <line x1="285" y1="155" x2="285" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="285" cy="155" r="8" fill="#dc2626" /><text x="285" y="158" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">10</text>
+  <div style="font-size: 8px; margin-bottom: 6px;">
+    Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones.
+  </div>
 
-                                <line x1="435" y1="22" x2="435" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="435" cy="22" r="8" fill="#dc2626" /><text x="435" y="25" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">11</text>
+  <!-- Tabla Seguridad Agrícola Oficial -->
+  <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px;">Seguridad agrícola</div>
+  <table class="tbl-agricola">
+    <tbody id="f_bodyAgricola">
+      <!-- Se autocompleta con los datos capturados -->
+    </tbody>
+  </table>
 
-                                <line x1="415" y1="155" x2="415" y2="128" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="415" cy="155" r="8" fill="#dc2626" /><text x="415" y="158" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">12</text>
+  <!-- Campo Basura e Inspectores -->
+  <table class="tbl-data" style="margin-top: 4px;">
+    <tr>
+      <td>
+        <strong>Basura en cabina generada por el operador (especifique):</strong> <span id="f_basura"></span>
+      </td>
+    </tr>
+  </table>
 
-                                <line x1="315" y1="22" x2="315" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="315" cy="22" r="8" fill="#dc2626" /><text x="315" y="25" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">13</text>
-
-                                <line x1="160" y1="18" x2="160" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="160" cy="18" r="8" fill="#dc2626" /><text x="160" y="21" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">14</text>
-
-                                <line x1="220" y1="18" x2="220" y2="40" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="220" cy="18" r="8" fill="#dc2626" /><text x="220" y="21" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">15</text>
-
-                                <line x1="145" y1="42" x2="145" y2="58" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="145" cy="42" r="8" fill="#dc2626" /><text x="145" y="45" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">16</text>
-
-                                <line x1="110" y1="32" x2="115" y2="50" stroke="#dc2626" stroke-width="1.5" marker-end="url(#red-arrow)"/>
-                                <circle cx="110" cy="32" r="8" fill="#dc2626" /><text x="110" y="35" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle">17</text>
-                            </svg>
-
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; text-align: left; font-size: 6.5px; font-weight: bold; color: #dc2626; margin-top: 6px; border-top: 1px solid #f1f5f9; padding-top: 4px;">
-                                <div>
-                                    <div>1.- Defensa</div>
-                                    <div>2.- Motor</div>
-                                    <div>3.- Llantas</div>
-                                    <div>4.- Piso (del camión)</div>
-                                    <div>5.- Tanque de combustible</div>
-                                </div>
-                                <div>
-                                    <div>6.- Cabina</div>
-                                    <div>7.- Tanque de aire</div>
-                                    <div>8.- Ejes de acción</div>
-                                    <div>9.- Llanta de repuesto</div>
-                                </div>
-                                <div>
-                                    <div>10.- Exteriores/ tren de rodaje</div>
-                                    <div>11.- Puertas por dentro/fuera</div>
-                                    <div>12.- Piso (de la caja)</div>
-                                    <div>13.- Paredes laterales</div>
-                                </div>
-                                <div>
-                                    <div>14.- Pared frontal</div>
-                                    <div>15.- Techo</div>
-                                    <div>16.- Unidad de refrigeración</div>
-                                    <div>17.- Escape</div>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td style="width: 54%; padding: 0; vertical-align: top;">
-                        <table class="pdf-table-border" style="border: none;">
-                            <thead>
-                                <tr style="background: #f1f5f9;">
-                                    <th style="width: 15px; border-top: none; border-left: none;">#</th>
-                                    <th style="text-align: left; border-top: none;">Punto de Inspección</th>
-                                    <th style="width: 20px; border-top: none;">St.</th>
-                                    <th style="text-align: left; border-top: none; border-right: none;">Observaciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="print-17-table-body">
-                                <!-- Dinámico -->
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-
-            <table class="pdf-table-border" style="margin-bottom: 5px;">
-                <thead>
-                    <tr style="background: #f1f5f9;">
-                        <th colspan="4" style="text-align: center; font-size: 9px; text-transform: uppercase;">SEGURIDAD AGRÍCOLA</th>
-                    </tr>
-                </thead>
-                <tbody id="print-agri-grid-body">
-                    <!-- Dinámico -->
-                </tbody>
-            </table>
-
-            <table class="pdf-table-border" style="margin-bottom: 20px;">
-                <tr>
-                    <td><strong>Basura en cabina generada por el operador:</strong> <span id="print-basura">Sin novedad</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Observaciones adicionales:</strong> <span id="print-observaciones">Sin observaciones adicionales</span></td>
-                </tr>
-            </table>
-
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; padding: 0 10px;">
-                <div>
-                    <div style="font-size: 9px;"><strong>Nombre Inspector:</strong> <span id="print-inspector-nombre">pedro</span></div>
-                    <div style="font-size: 7px; color: #666; margin-top: 2px;">Formato Oficial - Sistema de Gestión TICSA</div>
-                </div>
+  <!-- Pie con Firma Oficial -->
+  <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <strong>firma del oficial de seguridad:</strong><br>
+      <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-top: 3px;"><br>
+      <strong>Nombre:</strong> <span id="f_inspector"></span>
+    </div>
+    <div style="font-size: 9px; font-weight: bold;">
+      SGS-PTICSA-050-F01 Rev.01
+    </div>
+  </div>
+</div>
 
                 <div style="text-align: center; width: 220px;">
                     <div style="height: 35px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
