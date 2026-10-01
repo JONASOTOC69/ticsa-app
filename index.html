@@ -797,32 +797,22 @@
                     setTimeout(() => window.print(), 200);
                 }
             });
-        }
+       function saveAndPrint() {
+  saveInspection(true).then(record => {
+    if (record) {
+      populatePrintLayout(record);
+      setTimeout(() => { window.print(); }, 300);
+    }
+  });
+}
 
-        function printRecord(id) {
-            const record = window.globalRecords.find(item => item.id === id || item.timestamp === id);
-            if (record) {
-                populatePrintLayout(record);
-                setTimeout(() => window.print(), 200);
-            }
-        }
+function printRecord(id) {
+  const record = (window.globalRecords || []).find(item => (item.id === id || item.idTimestamp === id));
+  if (!record) return;
 
-        function populatePrintLayout(data) {
-            document.getElementById('print-folio').innerText = data.folio || data.timestamp || data.id;
-            document.getElementById('print-no-tracto').innerText = data.no_tracto;
-            document.getElementById('print-placas-tracto').innerText = data.placas_tracto;
-            document.getElementById('print-no-caja').innerText = data.no_caja;
-            document.getElementById('print-placas-caja').innerText = data.placas_caja;
-            document.getElementById('print-fecha').innerText = data.fecha;
-            document.getElementById('print-hora').innerText = data.hora;
-            document.getElementById('print-operador').innerText = data.operador;
-            document.getElementById('print-sello').innerText = data.sello_numero;
-            document.getElementById('print-basura').innerText = data.basura_cabina;
-            document.getElementById('print-observaciones').innerText = data.observaciones;
-            document.getElementById('print-inspector-nombre').innerText = data.oficial_nombre;
-
-            const sigImg = document.getElementById('print-signature-img');
-            if (data.signature) {
+  populatePrintLayout(record);
+  setTimeout(() => { window.print(); }, 300);
+}
                 sigImg.src = data.signature;
                 sigImg.style.display = 'block';
             } else {
@@ -834,45 +824,61 @@
             POINTS_17.forEach((point, idx) => {
                 const num = idx + 1;
                 const state = data.pointsState[num] || { status: 'ok', detail: '' };
-                let symbol = '✓';
-                if (state.status === 'fail') symbol = 'X';
-                if (state.status === 'na') symbol = 'N/A';
+         function populatePrintLayout(data) {
+  // Llenar datos de la unidad en el formato de impresión
+  if (document.getElementById('f_tracto')) document.getElementById('f_tracto').innerText = data.no_tracto || '';
+  if (document.getElementById('f_placasTracto')) document.getElementById('f_placasTracto').innerText = data.placas_tracto || '';
+  if (document.getElementById('f_caja')) document.getElementById('f_caja').innerText = data.no_caja || '';
+  if (document.getElementById('f_placasCaja')) document.getElementById('f_placasCaja').innerText = data.placas_caja || '';
+  if (document.getElementById('f_operador')) document.getElementById('f_operador').innerText = data.operador || '';
+  if (document.getElementById('f_fecha')) document.getElementById('f_fecha').innerText = data.fecha || '';
+  if (document.getElementById('f_hora')) document.getElementById('f_hora').innerText = data.hora || '';
+  if (document.getElementById('f_sello')) document.getElementById('f_sello').innerText = data.sello_numero || '';
+  if (document.getElementById('f_inspector')) document.getElementById('f_inspector').innerText = data.oficial_nombre || '';
+  if (document.getElementById('f_basura')) document.getElementById('f_basura').innerText = data.agri_basura || 'Sin novedad';
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="text-align: center; font-weight: bold;">${num}</td>
-                    <td>${point}</td>
-                    <td style="text-align: center; font-weight: bold;">${symbol}</td>
-                    <td>${state.detail || ''}</td>
-                `;
-                table17.appendChild(tr);
-            });
+  // Firma del Oficial
+  const imgFirma = document.getElementById('f_imgFirma');
+  if (imgFirma && data.signature) {
+    imgFirma.src = data.signature;
+    imgFirma.style.display = 'block';
+  }
 
-            const agriBody = document.getElementById('print-agri-grid-body');
-            agriBody.innerHTML = '';
-            const half = Math.ceil(AGRI_POINTS.length / 2);
-            for (let i = 0; i < half; i++) {
-                const item1 = AGRI_POINTS[i];
-                const state1 = (data.agriState[i] === 'detected') ? 'X' : '✓';
+  // Renderizar 17 Puntos
+  const pBody17 = document.getElementById('f_bodyPuntos');
+  if (pBody17 && data.points) {
+    pBody17.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const p1 = data.points[i];
+      const p2 = data.points[i + 9];
+      pBody17.innerHTML += `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${p1 ? p1.name : ''}</td>
+          <td style="text-align:center;"><strong>${p1 ? (p1.status === 'ok' ? '✓' : p1.status === 'fail' ? 'X' : 'N/A') : ''}</strong></td>
+          <td>${p2 ? i + 10 : ''}</td>
+          <td>${p2 ? p2.name : ''}</td>
+          <td style="text-align:center;"><strong>${p2 ? (p2.status === 'ok' ? '✓' : p2.status === 'fail' ? 'X' : 'N/A') : ''}</strong></td>
+        </tr>`;
+    }
+  }
 
-                const j = i + half;
-                const item2 = AGRI_POINTS[j] || '';
-                const state2 = item2 ? ((data.agriState[j] === 'detected') ? 'X' : '✓') : '';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item1}</td>
-                    <td style="text-align: center; font-weight: bold; width: 25px;">${state1}</td>
-                    <td>${item2}</td>
-                    <td style="text-align: center; font-weight: bold; width: 25px;">${state2}</td>
-                `;
-                agriBody.appendChild(tr);
-            }
-
-            const photoGrid = document.getElementById('print-photos-grid');
-            photoGrid.innerHTML = '';
-            if (data.photos && data.photos.length > 0) {
-                document.getElementById('print-photos-container').style.display = 'block';
+  // Renderizar Seguridad Agrícola
+  const pBodyAg = document.getElementById('f_bodyAgricola');
+  if (pBodyAg && data.agri) {
+    pBodyAg.innerHTML = '';
+    const agriKeys = Object.keys(data.agri);
+    for (let i = 0; i < agriKeys.length; i += 3) {
+      const k1 = agriKeys[i], k2 = agriKeys[i+1], k3 = agriKeys[i+2];
+      pBodyAg.innerHTML += `
+        <tr>
+          <td>${k1 || ''}</td><td style="text-align:center; width:25px;"><strong>${k1 ? (data.agri[k1] === 'detected' ? 'X' : '✓') : ''}</strong></td>
+          <td>${k2 || ''}</td><td style="text-align:center; width:25px;"><strong>${k2 ? (data.agri[k2] === 'detected' ? 'X' : '✓') : ''}</strong></td>
+          <td>${k3 || ''}</td><td style="text-align:center; width:25px;"><strong>${k3 ? (data.agri[k3] === 'detected' ? 'X' : '✓') : ''}</strong></td>
+        </tr>`;
+    }
+  }
+}
                 data.photos.forEach(src => {
                     const img = document.createElement('img');
                     img.src = src;
