@@ -1,23 +1,21 @@
 {
-  "name": "TICSA Inspecciones",
   "short_name": "TICSA",
-  "start_url": "/ticsa-app/index.html",
-  "scope": "/ticsa-app/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#FFB800",
+  "name": "TICSA - Inspecciones C-TPAT",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1042/1042339.png",
-      "sizes": "192x192",
+      "src": "LOGO_TICSA.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "192x192"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1042/1042339.png",
-      "sizes": "512x512",
+      "src": "LOGO_TICSA.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "512x512"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "portrait"
 }
