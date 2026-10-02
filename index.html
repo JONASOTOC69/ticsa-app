@@ -18,15 +18,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
+    /* ======================================================= */
+    /* REGLAS DE IMPRESIÓN EXACTA OFICIAL SGS-PTICSA-050-F01  */
+    /* ======================================================= */
     @media print {
       @page {
         size: letter portrait;
-        margin: 6mm;
+        margin: 4mm 6mm;
       }
-      body > *:not(#formatoImpresionOficial) { display: none !important; }
+      body > *:not(#formatoImpresionOficial) { 
+        display: none !important; 
+      }
       #formatoImpresionOficial { 
         display: block !important; 
-        font-family: Arial, sans-serif; 
+        font-family: Arial, Helvetica, sans-serif; 
         color: #000; 
         width: 100%; 
         padding: 0; 
@@ -36,28 +41,27 @@
       .tbl-print-border {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 3px;
+        margin-bottom: 2px;
       }
       .tbl-print-border td, .tbl-print-border th {
         border: 1px solid #000;
         padding: 2px 4px;
-        font-size: 8.5px;
+        font-size: 8pt;
       }
 
-      .trailer-box {
+      .trailer-box-oficial {
         width: 100%;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #000;
         padding: 2px;
         text-align: center;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
+        box-sizing: border-box;
       }
-      
-      .trailer-img-oficial {
-        max-width: 100%;
-        max-height: 180px;
-        display: block;
-        margin: 0 auto;
-        object-fit: contain;
+
+      .mark-check {
+        text-align: center;
+        font-weight: bold;
+        width: 25px;
       }
     }
     #formatoImpresionOficial { display: none; }
@@ -100,14 +104,14 @@
       <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <h2 class="font-bold text-slate-700 text-sm">📋 Datos Generales de la Unidad</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. TRACTO *</label><input type="text" id="no_tracto" placeholder="Ej. 08" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. TRACTO *</label><input type="text" id="no_tracto" placeholder="Ej. 09" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS TRACTO *</label><input type="text" id="placas_tracto" placeholder="Ej. 68ER9Y" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. CAJA</label><input type="text" id="no_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS CAJA</label><input type="text" id="placas_caja" placeholder="Ej. 0000" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">OPERADOR *</label><input type="text" id="operador" placeholder="Ej. JOSE MANUEL TARANGO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">NO. CAJA</label><input type="text" id="no_caja" placeholder="Ej. -" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">PLACAS CAJA</label><input type="text" id="placas_caja" placeholder="Ej. -" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">OPERADOR *</label><input type="text" id="operador" placeholder="Ej. ANTONIO ROCHE" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">FECHA *</label><input type="date" id="fecha" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
           <div><label class="block text-xs font-bold text-slate-500 mb-1">HORA *</label><input type="time" id="hora" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
-          <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. 026" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
+          <div><label class="block text-xs font-bold text-slate-500 mb-1">SELLO NÚMERO</label><input type="text" id="sello_numero" placeholder="Ej. -" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
         </div>
         <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
       </section>
@@ -174,7 +178,7 @@
           </div>
           <div class="md:col-span-2">
             <label class="block text-[10px] font-bold text-slate-500">BUSCAR POR TRACTO, CAJA U OPERADOR:</label>
-            <input type="text" id="filterSearch" onkeyup="applyFilters()" placeholder="Ej. 08, Marcos..." class="w-full border rounded p-1.5 text-xs">
+            <input type="text" id="filterSearch" onkeyup="applyFilters()" placeholder="Ej. 09, Roche..." class="w-full border rounded p-1.5 text-xs">
           </div>
         </div>
 
@@ -206,12 +210,12 @@
     <table class="tbl-print-border" style="margin-bottom: 2px;">
       <tr>
         <td style="width: 25%; text-align: center; vertical-align: middle;">
-          <div style="font-weight: 900; font-size: 22px; letter-spacing: 1px;">TICSA</div>
+          <div style="font-weight: 900; font-size: 20pt; letter-spacing: 1px;">TICSA</div>
         </td>
         <td style="width: 50%; text-align: center; vertical-align: middle;">
-          <div style="font-size: 11px; font-weight: bold;">Inspección 17 puntos, sello y seguridad agrícola</div>
+          <div style="font-size: 10pt; font-weight: bold;">Inspección 17 puntos, sello y seguridad agrícola</div>
         </td>
-        <td style="width: 25%; font-size: 8px; vertical-align: middle;">
+        <td style="width: 25%; font-size: 7.5pt; vertical-align: middle;">
           <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
           <div><strong>Rev.:</strong> 01</div>
         </td>
@@ -221,9 +225,9 @@
     <!-- Rejilla Datos de Unidad -->
     <table class="tbl-print-border" style="margin-bottom: 2px;">
       <tr>
-        <td style="width: 35%;"><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
+        <td style="width: 40%;"><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
         <td style="width: 35%;"><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
-        <td style="width: 30%;" rowspan="2"><strong>Hora:</strong> <span id="f_hora"></span></td>
+        <td style="width: 25%;" rowspan="2"><strong>Hora:</strong> <span id="f_hora"></span></td>
       </tr>
       <tr>
         <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
@@ -238,16 +242,51 @@
       </tr>
     </table>
 
-    <div style="background: #e2e8f0; border: 1px solid #000; padding: 2px; text-align: center; font-size: 8px; font-weight: bold; margin-bottom: 2px;">
+    <div style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7.5pt; margin-bottom: 2px;">
       La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
     </div>
 
-    <!-- Foto Real del Tráiler Oficial TICSA -->
-    <div class="trailer-box">
-      <img src="trailer.png" class="trailer-img-oficial" alt="Tráiler de Inspección 17 Puntos">
+    <!-- ILUSTRACIÓN VECTORIAL DEL TRÁILER IDÉNTICA A LA OFICIAL -->
+    <div class="trailer-box-oficial">
+      <svg viewBox="0 0 720 160" style="width: 100%; max-height: 135px; display: block; margin: 0 auto;">
+        <!-- Cabina Tracto -->
+        <path d="M 40 100 L 130 100 L 130 50 L 100 50 L 80 70 L 40 75 Z" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <!-- Caja -->
+        <rect x="135" y="30" width="530" height="70" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <!-- Llantas Tracto -->
+        <circle cx="65" cy="105" r="11" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <circle cx="105" cy="105" r="11" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <!-- Llantas Caja -->
+        <circle cx="560" cy="105" r="11" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <circle cx="590" cy="105" r="11" fill="#fff" stroke="#000" stroke-width="1.5"/>
+
+        <!-- Números 1 al 17 en Círculos Negros idénticos a la plantilla -->
+        <g fill="#000" font-weight="bold" font-size="9" text-anchor="middle">
+          <circle cx="45" cy="85" r="7.5" fill="#fff" stroke="#000"/><text x="45" y="88" fill="#000">1</text>
+          <circle cx="65" cy="60" r="7.5" fill="#fff" stroke="#000"/><text x="65" y="63" fill="#000">2</text>
+          <circle cx="65" cy="122" r="7.5" fill="#fff" stroke="#000"/><text x="65" y="125" fill="#000">3</text>
+          <circle cx="95" cy="88" r="7.5" fill="#fff" stroke="#000"/><text x="95" y="91" fill="#000">4</text>
+          <circle cx="118" cy="88" r="7.5" fill="#fff" stroke="#000"/><text x="118" y="91" fill="#000">5</text>
+          <circle cx="88" cy="62" r="7.5" fill="#fff" stroke="#000"/><text x="88" y="65" fill="#000">6</text>
+          <circle cx="145" cy="88" r="7.5" fill="#fff" stroke="#000"/><text x="145" y="91" fill="#000">7</text>
+          <circle cx="210" cy="122" r="7.5" fill="#fff" stroke="#000"/><text x="210" y="125" fill="#000">8</text>
+          <circle cx="310" cy="95" r="7.5" fill="#fff" stroke="#000"/><text x="310" y="98" fill="#000">9</text>
+          <circle cx="420" cy="102" r="7.5" fill="#fff" stroke="#000"/><text x="420" y="105" fill="#000">10</text>
+          <circle cx="655" cy="62" r="7.5" fill="#fff" stroke="#000"/><text x="655" y="65" fill="#000">11</text>
+          <circle cx="510" cy="88" r="7.5" fill="#fff" stroke="#000"/><text x="510" y="91" fill="#000">12</text>
+          <circle cx="560" cy="62" r="7.5" fill="#fff" stroke="#000"/><text x="560" y="65" fill="#000">13</text>
+          <circle cx="460" cy="62" r="7.5" fill="#fff" stroke="#000"/><text x="460" y="65" fill="#000">14</text>
+          <circle cx="560" cy="20" r="7.5" fill="#fff" stroke="#000"/><text x="560" y="23" fill="#000">15</text>
+          <circle cx="430" cy="40" r="7.5" fill="#fff" stroke="#000"/><text x="430" y="43" fill="#000">16</text>
+          <circle cx="95" cy="38" r="7.5" fill="#fff" stroke="#000"/><text x="95" y="41" fill="#000">17</text>
+        </g>
+      </svg>
+      <div style="font-size: 6.5pt; border-top: 1px solid #000; padding-top: 1px; margin-top: 1px;">
+        <strong>1.- Defensa | 2.- Motor | 3.- Llantas | 4.- Piso (del camión) | 5.- Tanque de combustible | 6.- Cabina | 7.- Tanque de aire | 8.- Ejes de acción | 9.- Llanta de repuesto | 10.- Exteriores/tren de rodaje | 11.- Puertas por dentro/fuera | 12.- Piso (de la caja) | 13.- Paredes laterales | 14.- Pared frontal | 15.- Techo | 16.- Unidad de refrigeración | 17.- Escape</strong>
+      </div>
     </div>
 
-    <div style="font-size: 7.5px; text-align: center; margin-bottom: 2px;">
+    <div style="font-size: 7pt; text-align: center; margin-bottom: 2px;">
       Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones
     </div>
 
@@ -255,15 +294,15 @@
     <table class="tbl-print-border">
       <thead>
         <tr>
-          <th colspan="3" style="width: 50%; text-align: center; background: #e6e6e6;">17 Puntos de inspección</th>
-          <th colspan="2" style="width: 50%; text-align: center; background: #e6e6e6;">Seguridad agrícola</th>
+          <th colspan="3" style="width: 50%; text-align: center; background: #fff;">17 Puntos de inspección</th>
+          <th colspan="2" style="width: 50%; text-align: center; background: #fff;">Seguridad agrícola</th>
         </tr>
         <tr>
           <th style="width: 20px;">#</th>
           <th>Punto</th>
-          <th style="width: 25px; text-align: center;">Estatus</th>
+          <th style="width: 30px; text-align: center;">Estatus</th>
           <th>Punto</th>
-          <th style="width: 25px; text-align: center;">Estatus</th>
+          <th style="width: 30px; text-align: center;">Estatus</th>
         </tr>
       </thead>
       <tbody id="f_bodySideBySide"></tbody>
@@ -280,13 +319,13 @@
     </table>
 
     <!-- Pie y Firma -->
-    <div style="margin-top: 5px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
       <div>
         <img id="f_imgFirma" style="max-height: 35px; border-bottom: 1px solid #000; margin-bottom: 2px;"><br>
-        <strong>firma del oficial de seguridad</strong><br>
-        <strong>Nombre:</strong> <span id="f_inspector"></span>
+        <strong style="font-size: 11pt;">firma del oficial de seguridad</strong><br>
+        <strong style="font-size: 11pt;">Nombre: <span id="f_inspector"></span></strong>
       </div>
-      <div style="font-size: 8px; font-weight: bold; text-align: right;">
+      <div style="font-size: 8pt; font-weight: bold; text-align: right;">
         SGS-PTICSA-050-F01<br>Rev.01
       </div>
     </div>
@@ -467,14 +506,14 @@
     }
 
     function populatePrintSideBySide(data) {
-      document.getElementById('f_tracto').innerText = data.no_tracto || '';
-      document.getElementById('f_placasTracto').innerText = data.placas_tracto || '';
-      document.getElementById('f_caja').innerText = data.no_caja || '';
-      document.getElementById('f_placasCaja').innerText = data.placas_caja || '';
-      document.getElementById('f_operador').innerText = data.operador || '';
-      document.getElementById('f_fecha').innerText = data.fecha || '';
-      document.getElementById('f_hora').innerText = data.hora || '';
-      document.getElementById('f_sello').innerText = data.sello_numero || '';
+      document.getElementById('f_tracto').innerText = data.no_tracto || '-';
+      document.getElementById('f_placasTracto').innerText = data.placas_tracto || '-';
+      document.getElementById('f_caja').innerText = data.no_caja || '-';
+      document.getElementById('f_placasCaja').innerText = data.placas_caja || '-';
+      document.getElementById('f_operador').innerText = data.operador || '-';
+      document.getElementById('f_fecha').innerText = data.fecha || '-';
+      document.getElementById('f_hora').innerText = data.hora || '-';
+      document.getElementById('f_sello').innerText = data.sello_numero || '-';
       document.getElementById('f_inspector').innerText = data.oficial_nombre || '';
       document.getElementById('f_basura').innerText = data.agri_basura || 'Sin novedad';
       document.getElementById('f_obs').innerText = data.observaciones || '';
