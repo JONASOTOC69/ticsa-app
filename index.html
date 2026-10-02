@@ -71,14 +71,14 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen">
 
-  <!-- BARRA SUPERIOR CON SUBIDA DE LOGO -->
+  <!-- BARRA SUPERIOR CON LOGO AUTOMÁTICO -->
   <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center gap-3">
-        <!-- Logo en App -->
+        <!-- Logo de Empresa -->
         <div id="appLogoContainer">
-          <div id="appBadgeText" class="bg-amber-400 text-slate-900 font-black text-xl px-3 py-1 rounded shadow">TICSA</div>
-          <img id="appCustomLogo" class="hidden max-h-10 object-contain" alt="Logo Empresa">
+          <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg'; this.nextElementSibling.classList.remove('hidden');" class="max-h-10 object-contain" alt="Logo TICSA">
+          <div class="hidden bg-amber-400 text-slate-900 font-black text-xl px-3 py-1 rounded shadow">TICSA</div>
         </div>
         <div>
           <h1 class="font-bold text-base leading-tight">Sistema de Inspecciones Cloud</h1>
@@ -86,10 +86,6 @@
         </div>
       </div>
       <div class="flex gap-2 items-center">
-        <!-- Botón Subir Logo -->
-        <input type="file" id="inputSubirLogo" accept="image/*" class="hidden" onchange="uploadCompanyLogo(event)">
-        <button onclick="document.getElementById('inputSubirLogo').click()" type="button" class="px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-400/40 rounded font-bold">📷 Subir Logo</button>
-        
         <button onclick="switchTab('nueva')" id="btnTabNueva" class="px-3 py-1.5 text-xs bg-amber-400 text-slate-900 font-bold rounded">✚ Nueva Inspección</button>
         <button onclick="switchTab('historial')" id="btnTabHistorial" class="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 text-white font-bold rounded flex items-center gap-1">📁 Historial Cloud <span id="badgeHistorial" class="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-full text-[10px]">0</span></button>
       </div>
@@ -220,8 +216,8 @@
     <table class="tbl-print-border" style="margin-bottom: 2px;">
       <tr>
         <td style="width: 28%; text-align: center; vertical-align: middle;">
-          <div id="printDefaultBadge" style="font-weight: 900; font-size: 20pt; letter-spacing: 1px;">TICSA</div>
-          <img id="printCustomLogo" class="hidden max-h-12 max-w-full mx-auto object-contain" alt="Logo">
+          <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg'; this.nextElementSibling.classList.remove('hidden');" class="max-h-12 max-w-full mx-auto object-contain" alt="Logo">
+          <div class="hidden" style="font-weight: 900; font-size: 20pt; letter-spacing: 1px;">TICSA</div>
         </td>
         <td style="width: 47%; text-align: center; vertical-align: middle;">
           <div style="font-size: 10pt; font-weight: bold; text-transform: uppercase;">Inspección 17 puntos, sello y seguridad agrícola</div>
@@ -327,38 +323,7 @@
 
     let pointStates = {}, agriStates = {}, recordsData = [];
 
-    // MANEJO DE LOGO PERSONALIZADO
-    function uploadCompanyLogo(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const logoData = e.target.result;
-        localStorage.setItem('ticsa_custom_logo', logoData);
-        applyLogo(logoData);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function applyLogo(logoData) {
-      if (!logoData) logoData = localStorage.getItem('ticsa_custom_logo');
-      if (logoData) {
-        // En App
-        document.getElementById('appBadgeText').classList.add('hidden');
-        const appImg = document.getElementById('appCustomLogo');
-        appImg.src = logoData;
-        appImg.classList.remove('hidden');
-
-        // En Impresión
-        document.getElementById('printDefaultBadge').classList.add('hidden');
-        const printImg = document.getElementById('printCustomLogo');
-        printImg.src = logoData;
-        printImg.classList.remove('hidden');
-      }
-    }
-
     function initForm() {
-      applyLogo();
       const pCont = document.getElementById('points-container');
       pCont.innerHTML = '';
       POINTS.forEach((p, idx) => {
