@@ -3,12 +3,12 @@
   "name": "TICSA - Inspecciones C-TPAT",
   "icons": [
     {
-      "src": "LOGO_TICSA.png",
+      "src": "icono.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "LOGO_TICSA.png",
+      "src": "icono.png",
       "type": "image/png",
       "sizes": "512x512"
     }
