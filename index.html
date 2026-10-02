@@ -65,6 +65,35 @@
         margin: 0 auto;
         object-fit: contain;
       }
+
+      /* SALTO DE PÁGINA PARA ANEXO FOTOGRÁFICO */
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+        margin-top: 10px;
+      }
+
+      .photo-grid-print {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .photo-item-print {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        background: #fff;
+      }
+
+      .photo-item-print img {
+        max-width: 100%;
+        max-height: 220px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
     }
     #formatoImpresionOficial { display: none; }
   </style>
@@ -217,99 +246,137 @@
 
   </main>
 
+  <!-- MODAL / VISOR FLOTANTE PARA VER FOTOS DESDE EL HISTORIAL -->
+  <div id="photoViewerModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+        <h3 class="font-bold text-sm">📷 Galería de Fotos - Inspección</h3>
+        <button onclick="closePhotoModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+      </div>
+      <div id="modalPhotoContent" class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto"></div>
+      <div class="p-3 bg-slate-100 border-t text-right">
+        <button onclick="closePhotoModal()" class="px-4 py-1.5 bg-slate-800 text-white rounded font-bold text-xs">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ======================================================= -->
   <!-- FORMATO IMPRESIÓN OFICIAL EXACTO SGS-PTICSA-050-F01     -->
   <!-- ======================================================= -->
   <div id="formatoImpresionOficial">
 
-    <!-- Encabezado Oficial con Logo -->
-    <table class="tbl-print-border" style="margin-bottom: 2px;">
-      <tr>
-        <td style="width: 28%; text-align: center; vertical-align: middle;">
-          <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg'; this.nextElementSibling.classList.remove('hidden');" class="max-h-12 max-w-full mx-auto object-contain" alt="Logo">
-          <div class="hidden" style="font-weight: 900; font-size: 20pt; letter-spacing: 1px;">TICSA</div>
-        </td>
-        <td style="width: 47%; text-align: center; vertical-align: middle;">
-          <div style="font-size: 10pt; font-weight: bold; text-transform: uppercase;">Inspección 17 puntos, sello y seguridad agrícola</div>
-        </td>
-        <td style="width: 25%; font-size: 7.5pt; vertical-align: middle;">
-          <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
-          <div><strong>Rev.:</strong> 01</div>
-        </td>
-      </tr>
-    </table>
-
-    <!-- Rejilla Datos de Unidad -->
-    <table class="tbl-print-border" style="margin-bottom: 2px;">
-      <tr>
-        <td style="width: 40%;"><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
-        <td style="width: 35%;"><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
-        <td style="width: 25%;" rowspan="2"><strong>Hora:</strong> <span id="f_hora"></span></td>
-      </tr>
-      <tr>
-        <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
-        <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
-      </tr>
-      <tr>
-        <td colspan="2"><strong>Operador:</strong> <span id="f_operador"></span></td>
-        <td rowspan="2" style="vertical-align: top;"><strong>Fecha:</strong> <span id="f_fecha"></span></td>
-      </tr>
-      <tr>
-        <td colspan="2"><strong>Sello número:</strong> <span id="f_sello"></span></td>
-      </tr>
-    </table>
-
-    <div style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7.5pt; margin-bottom: 2px;">
-      La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
-    </div>
-
-    <!-- Fotografía Real del Tráiler Oficial (trailer.png) -->
-    <div class="trailer-box-oficial">
-      <img src="trailer.png" class="trailer-img-oficial" alt="Tráiler de Inspección 17 Puntos">
-    </div>
-
-    <div style="font-size: 7pt; text-align: center; margin-bottom: 2px;">
-      Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones
-    </div>
-
-    <!-- Tablas 17 Puntos y Agrícola Lado a Lado -->
-    <table class="tbl-print-border">
-      <thead>
+    <!-- HOJA 1: FORMATO PRINCIPAL -->
+    <div>
+      <!-- Encabezado Oficial con Logo -->
+      <table class="tbl-print-border" style="margin-bottom: 2px;">
         <tr>
-          <th colspan="3" style="width: 50%; text-align: center; background: #fff;">17 Puntos de inspección</th>
-          <th colspan="2" style="width: 50%; text-align: center; background: #fff;">Seguridad agrícola</th>
+          <td style="width: 28%; text-align: center; vertical-align: middle;">
+            <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg'; this.nextElementSibling.classList.remove('hidden');" class="max-h-12 max-w-full mx-auto object-contain" alt="Logo">
+            <div class="hidden" style="font-weight: 900; font-size: 20pt; letter-spacing: 1px;">TICSA</div>
+          </td>
+          <td style="width: 47%; text-align: center; vertical-align: middle;">
+            <div style="font-size: 10pt; font-weight: bold; text-transform: uppercase;">Inspección 17 puntos, sello y seguridad agrícola</div>
+          </td>
+          <td style="width: 25%; font-size: 7.5pt; vertical-align: middle;">
+            <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
+            <div><strong>Rev.:</strong> 01</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Rejilla Datos de Unidad -->
+      <table class="tbl-print-border" style="margin-bottom: 2px;">
+        <tr>
+          <td style="width: 40%;"><strong>No. Tracto:</strong> <span id="f_tracto"></span></td>
+          <td style="width: 35%;"><strong>Placas Tracto:</strong> <span id="f_placasTracto"></span></td>
+          <td style="width: 25%;" rowspan="2"><strong>Hora:</strong> <span id="f_hora"></span></td>
         </tr>
         <tr>
-          <th style="width: 20px;">#</th>
-          <th>Punto</th>
-          <th style="width: 30px; text-align: center;">Estatus</th>
-          <th>Punto</th>
-          <th style="width: 30px; text-align: center;">Estatus</th>
+          <td><strong>No. Caja:</strong> <span id="f_caja"></span></td>
+          <td><strong>Placas Caja:</strong> <span id="f_placasCaja"></span></td>
         </tr>
-      </thead>
-      <tbody id="f_bodySideBySide"></tbody>
-    </table>
+        <tr>
+          <td colspan="2"><strong>Operador:</strong> <span id="f_operador"></span></td>
+          <td rowspan="2" style="vertical-align: top;"><strong>Fecha:</strong> <span id="f_fecha"></span></td>
+        </tr>
+        <tr>
+          <td colspan="2"><strong>Sello número:</strong> <span id="f_sello"></span></td>
+        </tr>
+      </table>
 
-    <!-- Campo Basura y Observaciones -->
-    <table class="tbl-print-border" style="margin-top: 2px;">
-      <tr>
-        <td>
-          <strong>Basura en cabina generada por el operador (especifique):</strong> <span id="f_basura"></span><br>
-          <strong>Observaciones adicionales:</strong> <span id="f_obs"></span>
-        </td>
-      </tr>
-    </table>
+      <div style="border: 1px solid #000; padding: 2px; text-align: center; font-size: 7.5pt; margin-bottom: 2px;">
+        La inspeccion debe completarse y documentarse en todos los contenedores y tractos.
+      </div>
 
-    <!-- Pie y Firma -->
-    <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
-      <div>
-        <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-bottom: 2px; display: none;"><br>
-        <strong style="font-size: 11pt;">firma del oficial de seguridad</strong><br>
-        <strong style="font-size: 11pt;">Nombre: <span id="f_inspector"></span></strong>
+      <!-- Fotografía Real del Tráiler Oficial (trailer.png) -->
+      <div class="trailer-box-oficial">
+        <img src="trailer.png" class="trailer-img-oficial" alt="Tráiler de Inspección 17 Puntos">
       </div>
-      <div style="font-size: 8pt; font-weight: bold; text-align: right;">
-        SGS-PTICSA-050-F01<br>Rev.01
+
+      <div style="font-size: 7pt; text-align: center; margin-bottom: 2px;">
+        Marque con una <strong>✓</strong> cuando NO se encuentren elementos extraños y con una <strong>X</strong> cuando exista alguna irregularidad y detallar en observaciones
       </div>
+
+      <!-- Tablas 17 Puntos y Agrícola Lado a Lado -->
+      <table class="tbl-print-border">
+        <thead>
+          <tr>
+            <th colspan="3" style="width: 50%; text-align: center; background: #fff;">17 Puntos de inspección</th>
+            <th colspan="2" style="width: 50%; text-align: center; background: #fff;">Seguridad agrícola</th>
+          </tr>
+          <tr>
+            <th style="width: 20px;">#</th>
+            <th>Punto</th>
+            <th style="width: 30px; text-align: center;">Estatus</th>
+            <th>Punto</th>
+            <th style="width: 30px; text-align: center;">Estatus</th>
+          </tr>
+        </thead>
+        <tbody id="f_bodySideBySide"></tbody>
+      </table>
+
+      <!-- Campo Basura y Observaciones -->
+      <table class="tbl-print-border" style="margin-top: 2px;">
+        <tr>
+          <td>
+            <strong>Basura en cabina generada por el operador (especifique):</strong> <span id="f_basura"></span><br>
+            <strong>Observaciones adicionales:</strong> <span id="f_obs"></span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Pie y Firma -->
+      <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-bottom: 2px; display: none;"><br>
+          <strong style="font-size: 11pt;">firma del oficial de seguridad</strong><br>
+          <strong style="font-size: 11pt;">Nombre: <span id="f_inspector"></span></strong>
+        </div>
+        <div style="font-size: 8pt; font-weight: bold; text-align: right;">
+          SGS-PTICSA-050-F01<br>Rev.01
+        </div>
+      </div>
+    </div>
+
+    <!-- HOJA 2: ANEXO FOTOGRÁFICO DE EVIDENCIA (SI TIENE FOTOS) -->
+    <div id="f_pagePhotos" class="page-break" style="display: none;">
+      <table class="tbl-print-border" style="margin-bottom: 6px;">
+        <tr>
+          <td style="width: 28%; text-align: center; vertical-align: middle;">
+            <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg';" class="max-h-10 max-w-full mx-auto object-contain" alt="Logo">
+          </td>
+          <td style="width: 47%; text-align: center; vertical-align: middle;">
+            <div style="font-size: 10pt; font-weight: bold; text-transform: uppercase;">Anexo de Evidencia Fotográfica</div>
+            <div style="font-size: 8pt;">No. Tracto: <span id="f_p_tracto"></span> | Caja: <span id="f_p_caja"></span> | Fecha: <span id="f_p_fecha"></span></div>
+          </td>
+          <td style="width: 25%; font-size: 7.5pt; vertical-align: middle;">
+            <div><strong>Código:</strong> SGS-PTICSA-050-F01</div>
+            <div><strong>Rev.:</strong> 01</div>
+          </td>
+        </tr>
+      </table>
+
+      <div id="f_photoContainerPrint" class="photo-grid-print"></div>
     </div>
 
   </div>
@@ -385,6 +452,31 @@
     function removePhoto(idx) {
       currentPhotos.splice(idx, 1);
       renderPhotoGallery();
+    }
+
+    // VER FOTOS DESDE EL HISTORIAL
+    function openPhotoModal(id) {
+      const r = recordsData.find(item => item.id === id);
+      if (!r || !r.photos || r.photos.length === 0) {
+        alert("Esta inspección no tiene fotos adjuntas.");
+        return;
+      }
+
+      const content = document.getElementById('modalPhotoContent');
+      content.innerHTML = '';
+      r.photos.forEach((src, idx) => {
+        content.innerHTML += `
+          <div class="border rounded-lg overflow-hidden bg-slate-100 p-1 shadow-sm">
+            <img src="${src}" class="w-full h-48 object-cover rounded">
+            <p class="text-[10px] text-center text-slate-500 font-bold mt-1">Foto ${idx + 1}</p>
+          </div>`;
+      });
+
+      document.getElementById('photoViewerModal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photoViewerModal').classList.add('hidden');
     }
 
     // FIRMA DIGITAL TÁCTIL Y MOUSE
@@ -591,7 +683,9 @@
             <td class="p-2.5">Tracto: <strong>${r.no_tracto || '-'}</strong><br>Caja: ${r.no_caja || '-'}</td>
             <td class="p-2.5">${r.operador || '-'}</td>
             <td class="p-2.5">${r.oficial_nombre || '-'}</td>
-            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-slate-200 text-xs font-bold">📷 ${photoCount}</span></td>
+            <td class="p-2.5 text-center">
+              <button onclick="openPhotoModal('${r.id}')" class="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-xs font-bold transition">📷 ${photoCount}</button>
+            </td>
             <td class="p-2.5 text-center flex justify-center gap-2">
               <button onclick="reprintFromHistory('${r.id}')" class="px-2 py-1 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">🖨️ PDF</button>
               <button onclick="deleteRecord('${r.id}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded font-bold">🗑️</button>
@@ -642,6 +736,29 @@
             <td>${aName}</td>
             <td style="text-align: center; font-weight: bold;">${aStat}</td>
           </tr>`;
+      }
+
+      // IMPRESIÓN DE ANEXO FOTOGRÁFICO
+      const photoSection = document.getElementById('f_pagePhotos');
+      const photoGrid = document.getElementById('f_photoContainerPrint');
+      photoGrid.innerHTML = '';
+
+      if (data.photos && data.photos.length > 0) {
+        document.getElementById('f_p_tracto').innerText = data.no_tracto || '-';
+        document.getElementById('f_p_caja').innerText = data.no_caja || '-';
+        document.getElementById('f_p_fecha').innerText = data.fecha || '-';
+
+        data.photos.forEach((src, idx) => {
+          photoGrid.innerHTML += `
+            <div class="photo-item-print">
+              <img src="${src}">
+              <div style="font-size: 8pt; font-weight: bold; margin-top: 2px;">Foto ${idx + 1}</div>
+            </div>`;
+        });
+
+        photoSection.style.display = 'block';
+      } else {
+        photoSection.style.display = 'none';
       }
     }
 
