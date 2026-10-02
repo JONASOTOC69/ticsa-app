@@ -75,7 +75,6 @@
   <header class="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-50">
     <div class="max-w-5xl mx-auto flex justify-between items-center flex-wrap gap-2">
       <div class="flex items-center gap-3">
-        <!-- Logo de Empresa -->
         <div id="appLogoContainer">
           <img src="LOGO_TICSA.png" onerror="this.onerror=null; this.src='LOGO_TICSA.jpg'; this.nextElementSibling.classList.remove('hidden');" class="max-h-10 object-contain" alt="Logo TICSA">
           <div class="hidden bg-amber-400 text-slate-900 font-black text-xl px-3 py-1 rounded shadow">TICSA</div>
@@ -122,6 +121,14 @@
         <div><label class="block text-xs font-bold text-slate-500 mb-1">OFICIAL DE SEGURIDAD / INSPECTOR *</label><input type="text" id="oficial_nombre" placeholder="Ej. PEDRO" class="w-full border rounded p-2 text-sm bg-slate-50"></div>
       </section>
 
+      <!-- APARTADO DE EVIDENCIA FOTOGRÁFICA -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <h2 class="font-bold text-slate-700 text-sm flex items-center gap-2">📷 Evidencia Fotográfica de las Unidades</h2>
+        <input type="file" id="inputPhoto" accept="image/*" capture="environment" multiple class="hidden" onchange="handlePhotoUpload(event)">
+        <button onclick="document.getElementById('inputPhoto').click()" type="button" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs rounded-lg shadow inline-flex items-center gap-2">📷 Tomar Foto / Adjuntar Imágenes</button>
+        <div id="photoGallery" class="flex flex-wrap gap-3 pt-2"></div>
+      </section>
+
       <!-- 17 PUNTOS -->
       <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
         <div class="flex flex-wrap justify-between items-center gap-2 pb-2 border-b">
@@ -148,7 +155,7 @@
         </div>
       </section>
 
-      <!-- OBSERVACIONES Y FIRMA -->
+      <!-- OBSERVACIONES Y FIRMA DIGITAL -->
       <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-500 mb-1">OBSERVACIONES ADICIONALES:</label>
@@ -156,8 +163,10 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-500 mb-1">FIRMA DIGITAL DEL OFICIAL DE SEGURIDAD *</label>
-          <canvas id="signaturePad" width="350" height="120" class="border border-slate-300 rounded bg-slate-50 cursor-crosshair touch-none"></canvas>
-          <button onclick="clearSignature()" class="text-xs text-slate-500 underline mt-1 block">Limpiar Firma</button>
+          <div class="w-full max-w-md bg-slate-50 border-2 border-dashed border-slate-300 rounded-lg p-1">
+            <canvas id="signaturePad" class="w-full h-32 bg-white rounded cursor-crosshair touch-none"></canvas>
+          </div>
+          <button onclick="clearSignature()" type="button" class="text-xs text-slate-500 underline mt-1 block">Limpiar Firma</button>
         </div>
       </section>
 
@@ -196,6 +205,7 @@
                 <th class="p-2.5">TRACTO / CAJA</th>
                 <th class="p-2.5">OPERADOR</th>
                 <th class="p-2.5">INSPECTOR</th>
+                <th class="p-2.5 text-center">FOTOS</th>
                 <th class="p-2.5 text-center">ACCIONES</th>
               </tr>
             </thead>
@@ -293,7 +303,7 @@
     <!-- Pie y Firma -->
     <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-end;">
       <div>
-        <img id="f_imgFirma" style="max-height: 35px; border-bottom: 1px solid #000; margin-bottom: 2px;"><br>
+        <img id="f_imgFirma" style="max-height: 40px; border-bottom: 1px solid #000; margin-bottom: 2px; display: none;"><br>
         <strong style="font-size: 11pt;">firma del oficial de seguridad</strong><br>
         <strong style="font-size: 11pt;">Nombre: <span id="f_inspector"></span></strong>
       </div>
@@ -321,9 +331,133 @@
     const POINTS = ["Defensa", "Motor", "Llantas", "Piso (del camión)", "Tanque de combustible", "Cabina", "Tanque de aire", "Ejes de acción", "Llanta de repuesto", "Exteriores/ tren de rodaje", "Puertas por dentro/fuera", "Piso (de la caja)", "Paredes laterales", "Pared frontal", "Techo", "Unidad de refrigeración", "Escape"];
     const AGRI_ITEMS = ["Insectos vivos o muertos", "Moho", "Hojas, ramitas, corteza", "Huevecillos", "Carne", "Sangre", "Huesos", "Pelo", "Secreciones", "Excreciones", "Frutas", "Semillas", "Hongos", "Lodo", "Animal vivo o muerto: liebre, serpiente"];
 
-    let pointStates = {}, agriStates = {}, recordsData = [];
+    let pointStates = {}, agriStates = {}, recordsData = [], currentPhotos = [];
+
+    // MANEJO DE EVIDENCIA FOTOGRÁFICA
+    function handlePhotoUpload(e) {
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxDim = 800;
+            let width = img.width, height = img.height;
+
+            if (width > height && width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+            currentPhotos.push(compressedBase64);
+            renderPhotoGallery();
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderPhotoGallery() {
+      const gallery = document.getElementById('photoGallery');
+      gallery.innerHTML = '';
+      currentPhotos.forEach((src, idx) => {
+        gallery.innerHTML += `
+          <div class="relative w-20 h-20 border rounded-lg overflow-hidden group shadow-sm bg-slate-200">
+            <img src="${src}" class="w-full h-full object-cover">
+            <button onclick="removePhoto(${idx})" type="button" class="absolute top-1 right-1 bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow">✕</button>
+          </div>`;
+      });
+    }
+
+    function removePhoto(idx) {
+      currentPhotos.splice(idx, 1);
+      renderPhotoGallery();
+    }
+
+    // FIRMA DIGITAL TÁCTIL Y MOUSE
+    const canvas = document.getElementById('signaturePad');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false, hasSignature = false;
+
+    function resizeSignatureCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+      }
+    }
+
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    function startDrawing(e) {
+      e.preventDefault();
+      isDrawing = true;
+      hasSignature = true;
+      const coords = getCanvasCoords(e);
+      ctx.beginPath();
+      ctx.moveTo(coords.x, coords.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const coords = getCanvasCoords(e);
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    }
+
+    function stopDrawing(e) {
+      if (isDrawing) {
+        e.preventDefault();
+        isDrawing = false;
+      }
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing, { passive: false });
+
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      hasSignature = false;
+    }
 
     function initForm() {
+      currentPhotos = [];
+      renderPhotoGallery();
+      clearSignature();
+      setTimeout(resizeSignatureCanvas, 200);
+
       const pCont = document.getElementById('points-container');
       pCont.innerHTML = '';
       POINTS.forEach((p, idx) => {
@@ -387,20 +521,6 @@
       AGRI_ITEMS.forEach((_, idx) => setAgriStatus(idx, 'ok'));
     }
 
-    // CANVAS FIRMA
-    const canvas = document.getElementById('signaturePad');
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
-    canvas.addEventListener('mousedown', () => drawing = true);
-    canvas.addEventListener('mouseup', () => drawing = false);
-    canvas.addEventListener('mousemove', (e) => {
-      if(!drawing) return;
-      const r = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
-      ctx.stroke();
-    });
-    function clearSignature() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath(); }
-
     async function saveInspection(showAlert = true) {
       const data = {
         no_tracto: document.getElementById('no_tracto').value,
@@ -415,7 +535,8 @@
         agri_basura: document.getElementById('agri_basura').value,
         observaciones: document.getElementById('observaciones').value,
         pointStates, agriStates,
-        signature: canvas.toDataURL(),
+        photos: currentPhotos,
+        signature: hasSignature ? canvas.toDataURL() : null,
         timestamp: new Date().getTime()
       };
 
@@ -458,17 +579,19 @@
       const tbody = document.getElementById('historialTableBody');
       tbody.innerHTML = '';
       if(data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No se encontraron inspecciones.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">No se encontraron inspecciones.</td></tr>';
         return;
       }
 
       data.forEach(r => {
+        const photoCount = (r.photos || []).length;
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50">
             <td class="p-2.5"><strong>${r.fecha || ''}</strong><br><span class="text-[10px] text-slate-400">${r.hora || ''}</span></td>
             <td class="p-2.5">Tracto: <strong>${r.no_tracto || '-'}</strong><br>Caja: ${r.no_caja || '-'}</td>
             <td class="p-2.5">${r.operador || '-'}</td>
             <td class="p-2.5">${r.oficial_nombre || '-'}</td>
+            <td class="p-2.5 text-center"><span class="px-2 py-0.5 rounded bg-slate-200 text-xs font-bold">📷 ${photoCount}</span></td>
             <td class="p-2.5 text-center flex justify-center gap-2">
               <button onclick="reprintFromHistory('${r.id}')" class="px-2 py-1 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded font-bold">🖨️ PDF</button>
               <button onclick="deleteRecord('${r.id}')" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded font-bold">🗑️</button>
@@ -489,7 +612,14 @@
       document.getElementById('f_inspector').innerText = data.oficial_nombre || '';
       document.getElementById('f_basura').innerText = data.agri_basura || 'Sin novedad';
       document.getElementById('f_obs').innerText = data.observaciones || '';
-      if (data.signature) document.getElementById('f_imgFirma').src = data.signature;
+
+      const imgFirma = document.getElementById('f_imgFirma');
+      if (data.signature) {
+        imgFirma.src = data.signature;
+        imgFirma.style.display = 'inline-block';
+      } else {
+        imgFirma.style.display = 'none';
+      }
 
       const tbody = document.getElementById('f_bodySideBySide');
       tbody.innerHTML = '';
@@ -537,7 +667,8 @@
         agri_basura: document.getElementById('agri_basura').value,
         observaciones: document.getElementById('observaciones').value,
         pointStates, agriStates,
-        signature: canvas.toDataURL()
+        photos: currentPhotos,
+        signature: hasSignature ? canvas.toDataURL() : null
       };
 
       saveInspection(false);
@@ -556,15 +687,16 @@
       document.getElementById('viewHistorial').style.display = tab === 'historial' ? 'block' : 'none';
       document.getElementById('btnTabNueva').className = `px-3 py-1.5 text-xs font-bold rounded ${tab==='nueva'?'bg-amber-400 text-slate-900':'bg-slate-700 text-white'}`;
       document.getElementById('btnTabHistorial').className = `px-3 py-1.5 text-xs font-bold rounded flex items-center gap-1 ${tab==='historial'?'bg-amber-400 text-slate-900':'bg-slate-700 text-white'}`;
+      if (tab === 'nueva') setTimeout(resizeSignatureCanvas, 200);
     }
 
     function resetForm() {
       document.querySelectorAll('input, textarea').forEach(i => i.value = '');
-      clearSignature();
       initForm();
     }
 
     window.onload = initForm;
+    window.onresize = resizeSignatureCanvas;
   </script>
 </body>
 </html>
